@@ -3,41 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>CinePlay 8 Ball Pool PRO</title>
+    <title>CinePlay 8 Ball PRO | Joabe Play</title>
     <style>
-        :root { --neon: #00ff88; --wood: #2c1e14; --felt: #0b5345; }
-        body, html { margin: 0; padding: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; }
+        :root { --neon: #00ff88; --wood: #3e2a1c; --felt: #07633a; }
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; }
         
         #app { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
 
-        /* HUD - Interface de App */
+        /* Interface Superior */
         #hud {
-            width: 90%; max-width: 1000px; background: rgba(15,15,15,0.95);
-            padding: 15px; border-radius: 20px; border-bottom: 3px solid var(--neon);
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            width: 95%; max-width: 1100px; background: rgba(15,15,15,0.9);
+            padding: 10px 20px; border-radius: 15px; border-bottom: 3px solid var(--neon);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
         }
-        .player { padding: 10px 20px; border-radius: 12px; border: 2px solid transparent; transition: 0.3s; width: 40%; }
-        .active { border-color: var(--neon); background: rgba(0,255,136,0.1); box-shadow: 0 0 15px rgba(0,255,136,0.3); }
-        .name { font-weight: bold; font-size: 1.1em; letter-spacing: 1px; }
-        .ball-group { font-size: 0.8em; color: var(--neon); margin-top: 5px; height: 15px; }
+        .player { padding: 8px 15px; border-radius: 10px; border: 2px solid transparent; text-align: center; color: white; width: 40%; }
+        .active { border-color: var(--neon); background: rgba(0,255,136,0.1); }
+        .ball-group { font-size: 0.8em; color: var(--neon); font-weight: bold; margin-top: 5px; }
 
-        /* Mesa com Moldura */
+        /* Moldura da Mesa */
         #table-frame {
-            padding: 20px; background: var(--wood); border-radius: 25px;
-            box-shadow: inset 0 0 40px #000, 0 20px 60px rgba(0,0,0,0.9);
+            padding: 15px; background: var(--wood); border-radius: 20px;
+            box-shadow: inset 0 0 40px #000, 0 15px 50px rgba(0,0,0,0.8);
             position: relative;
         }
-        canvas { background: var(--felt); border-radius: 10px; display: block; box-shadow: inset 0 0 100px rgba(0,0,0,0.5); }
+        canvas { background: var(--felt); border-radius: 5px; display: block; cursor: crosshair; }
 
         /* Barra de Força Lateral */
         #power-ui {
-            position: absolute; right: -45px; top: 50%; transform: translateY(-50%);
-            height: 280px; width: 15px; background: #111; border: 2px solid #333; border-radius: 10px; overflow: hidden;
+            position: absolute; right: -35px; top: 50%; transform: translateY(-50%);
+            height: 250px; width: 15px; background: #111; border: 2px solid #444; border-radius: 10px; overflow: hidden;
         }
-        #power-bar { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, #00ff88, #ffeb3b, #f00); transition: height 0.1s; }
+        #power-bar { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, #00ff88, #ff3300); }
 
-        #msg-center { position: absolute; bottom: 25px; background: rgba(0,0,0,0.7); padding: 8px 25px; border-radius: 30px; font-size: 0.9em; border: 1px solid #333; }
+        #msg { position: absolute; bottom: 15px; color: white; background: rgba(0,0,0,0.6); padding: 5px 20px; border-radius: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -45,12 +43,12 @@
 <div id="app">
     <div id="hud">
         <div id="p1-ui" class="player active">
-            <div class="name">👤 JOABE PLAY</div>
-            <div id="p1-type" class="ball-group">Lisas/Listradas?</div>
+            <div style="font-weight:bold">👤 JOABE PLAY</div>
+            <div id="p1-type" class="ball-group">DEFININDO...</div>
         </div>
-        <div style="font-style: italic; font-weight: 900; color: #444; font-size: 1.5em;">VS</div>
+        <div style="color: #444; font-weight: 900;">VS</div>
         <div id="p2-ui" class="player">
-            <div class="name">🤖 BOT PRO</div>
+            <div style="font-weight:bold">🤖 BOT PRO</div>
             <div id="p2-type" class="ball-group"></div>
         </div>
     </div>
@@ -60,21 +58,21 @@
         <canvas id="poolCanvas"></canvas>
     </div>
 
-    <div id="msg-center">Ajuste sua mira e segure para carregar!</div>
+    <div id="msg">Sua vez! Acerte as caçapas.</div>
 </div>
 
 <script>
     const canvas = document.getElementById('poolCanvas');
     const ctx = canvas.getContext('2d');
     const powerBar = document.getElementById('power-bar');
-    const msgCenter = document.getElementById('msg-center');
+    const msg = document.getElementById('msg');
 
-    // Configurações Físicas e Regras
-    const FRICTION = 0.987;
+    // CONFIGURAÇÕES GLOBAIS
+    let ballRadius, whiteBall, balls = [], pockets = [];
+    const FRICTION = 0.985;
     const WALL_BOUNCE = 0.7;
-    let ballRadius, balls = [], whiteBall;
     let turn = 1; // 1: Joabe, 2: Bot
-    let p1Balls = null, p2Balls = null; // 'solid' ou 'stripe'
+    let p1Type = null; // 'solid' ou 'stripe'
     let isMoving = false, isCharging = false, power = 0, mouseX, mouseY;
 
     class Ball {
@@ -87,19 +85,19 @@
         draw() {
             if (this.inPocket) return;
             
-            // Sombra e Reflexo 3D Profissional
-            ctx.save();
+            // Sombra
             ctx.beginPath();
             ctx.arc(this.x + 3, this.y + 3, this.radius, 0, Math.PI*2);
             ctx.fillStyle = "rgba(0,0,0,0.3)";
             ctx.fill();
 
+            // Bola
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
             ctx.fillStyle = this.color;
             ctx.fill();
 
-            // Faixa se for listrada
+            // Detalhe de Listra
             if (this.type === 'stripe') {
                 ctx.beginPath();
                 ctx.ellipse(this.x, this.y, this.radius, this.radius * 0.5, 0, 0, Math.PI * 2);
@@ -120,13 +118,11 @@
                 ctx.fillText(this.num, this.x, this.y);
             }
 
-            // Brilho Premium
-            let grad = ctx.createRadialGradient(this.x - 4, this.y - 4, 1, this.x, this.y, this.radius);
-            grad.addColorStop(0, "rgba(255,255,255,0.5)");
-            grad.addColorStop(1, "rgba(0,0,0,0.2)");
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.restore();
+            // Brilho 3D
+            let grad = ctx.createRadialGradient(this.x-4, this.y-4, 1, this.x, this.y, this.radius);
+            grad.addColorStop(0, "rgba(255,255,255,0.4)");
+            grad.addColorStop(1, "rgba(0,0,0,0.1)");
+            ctx.fillStyle = grad; ctx.fill();
         }
 
         update() {
@@ -137,7 +133,7 @@
             if (Math.abs(this.vx) < 0.1) this.vx = 0;
             if (Math.abs(this.vy) < 0.1) this.vy = 0;
 
-            // Borda
+            // Borda da mesa
             if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
                 this.vx *= -WALL_BOUNCE;
                 this.x = this.x < this.radius ? this.radius : canvas.width - this.radius;
@@ -150,25 +146,35 @@
         }
 
         checkPocket() {
-            const pockets = [
-                {x:0, y:0}, {x:canvas.width/2, y:0}, {x:canvas.width, y:0},
-                {x:0, y:canvas.height}, {x:canvas.width/2, y:canvas.height}, {x:canvas.width, y:canvas.height}
-            ];
             pockets.forEach(p => {
-                if (Math.hypot(this.x - p.x, this.y - p.y) < ballRadius * 2.2) {
-                    this.inPocket = true; this.vx = 0; this.vy = 0;
-                    handleScoring(this);
+                const dist = Math.hypot(this.x - p.x, this.y - p.y);
+                // Se cair no buraco (o buraco é 2.5x maior que a bola)
+                if (dist < ballRadius * 1.8) {
+                    this.inPocket = true;
+                    this.vx = 0; this.vy = 0;
+                    handleRules(this);
                 }
             });
         }
     }
 
     function init() {
-        const w = Math.min(window.innerWidth * 0.85, 1000);
-        canvas.width = w; canvas.height = w / 2;
-        ballRadius = canvas.width * 0.018;
+        // Mesa GIGANTE: 90% da largura da tela, proporção 2:1
+        const w = window.innerWidth * 0.9;
+        canvas.width = w;
+        canvas.height = w / 2;
+        
+        // Bolas e Caçapas GIGANTES
+        ballRadius = canvas.width * 0.022; 
+        
+        // Posição das Caçapas (Buracos)
+        pockets = [
+            {x: 0, y: 0}, {x: canvas.width/2, y: 0}, {x: canvas.width, y: 0},
+            {x: 0, y: canvas.height}, {x: canvas.width/2, y: canvas.height}, {x: canvas.width, y: canvas.height}
+        ];
+
         setupBalls();
-        loop();
+        requestAnimationFrame(loop);
     }
 
     function setupBalls() {
@@ -180,41 +186,70 @@
         let count = 1;
         const startX = canvas.width * 0.7, startY = canvas.height/2;
 
+        // Triângulo Oficial
         for (let i = 0; i < 5; i++) {
             for (let j = 0; j <= i; j++) {
                 let type = count === 8 ? "black" : (count <= 7 ? "solid" : "stripe");
                 let color = count === 8 ? "black" : colors[(count-1) % 7];
-                balls.push(new Ball(startX + (i*ballRadius*1.75), startY + (j*ballRadius*2.1) - (i*ballRadius), ballRadius, color, count, type));
+                balls.push(new Ball(startX + (i*ballRadius*1.8), startY + (j*ballRadius*2.1) - (i*ballRadius), ballRadius, color, count, type));
                 count++;
             }
         }
     }
 
-    function handleScoring(ball) {
+    function handleRules(ball) {
         if (ball.type === "white") {
-            msgCenter.innerText = "BRANCA NA CAÇAPA! Falta.";
+            msg.innerText = "FALTA! Branca caiu.";
             setTimeout(() => { ball.inPocket = false; ball.x = canvas.width*0.25; ball.y = canvas.height/2; }, 1000);
         } else if (ball.type === "black") {
-            alert(turn === 1 ? "JOABE VENCEU O JOGO! 🏆" : "O BOT VENCEU! 🤖");
-            location.reload();
-        } else {
-            // Lógica de definir grupo (Lisa ou Listrada)
-            if (!p1Balls) {
-                p1Balls = (turn === 1) ? ball.type : (ball.type === 'solid' ? 'stripe' : 'solid');
-                p2Balls = (p1Balls === 'solid') ? 'stripe' : 'solid';
-                document.getElementById('p1-type').innerText = p1Balls === 'solid' ? "Bolas: LISAS" : "Bolas: LISTRADAS";
-                document.getElementById('p2-type').innerText = p2Balls === 'solid' ? "Bolas: LISAS" : "Bolas: LISTRADAS";
+            // Regra da Bola 8
+            const rem = balls.filter(b => !b.inPocket && b.type !== 'white' && b.type !== 'black').length;
+            if (rem > 0) {
+                alert("DERROTA! Encaçapou a 8 antes da hora.");
+            } else {
+                alert(turn === 1 ? "JOABE PLAY VENCEU! 🏆" : "BOT VENCEU!");
             }
+            location.reload();
+        } else if (!p1Type) {
+            // Define grupo após a primeira bola
+            p1Type = (turn === 1) ? ball.type : (ball.type === 'solid' ? 'stripe' : 'solid');
+            document.getElementById('p1-type').innerText = p1Type === 'solid' ? "LISAS" : "LISTRADAS";
+            document.getElementById('p2-type').innerText = p1Type === 'solid' ? "LISTRADAS" : "LISAS";
         }
     }
 
     function loop() {
-        ctx.fillStyle = "#0b5345"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#07633a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
         
-        // Desenhar Caçapas
+        // Desenhar Caçapas (Buracos Gigantes)
         ctx.fillStyle = "#111";
-        const pockets = [{x:0, y:0}, {x:canvas.width/2, y:0}, {x:canvas.width, y:0}, {x:0, y:canvas.height}, {x:canvas.width/2, y:canvas.height}, {x:canvas.width, y:canvas.height}];
-        pockets.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, ballRadius*2.2, 0, Math.PI*2); ctx.fill(); });
+        pockets.forEach(p => {
+            ctx.beginPath(); ctx.arc(p.x, p.y, ballRadius * 2.2, 0, Math.PI*2); ctx.fill();
+        });
+
+        // Colisões entre bolas
+        for (let i = 0; i < balls.length; i++) {
+            for (let j = i + 1; j < balls.length; j++) {
+                let b1 = balls[i], b2 = balls[j];
+                if (b1.inPocket || b2.inPocket) continue;
+                let dx = b2.x - b1.x, dy = b2.y - b1.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist < b1.radius + b2.radius) {
+                    let angle = Math.atan2(dy, dx);
+                    let vx1 = b1.vx * Math.cos(angle) + b1.vy * Math.sin(angle);
+                    let vy1 = b1.vy * Math.cos(angle) - b1.vx * Math.sin(angle);
+                    let vx2 = b2.vx * Math.cos(angle) + b2.vy * Math.sin(angle);
+                    let vy2 = b2.vy * Math.cos(angle) - b2.vx * Math.sin(angle);
+                    b1.vx = vx2 * Math.cos(angle) - vy1 * Math.sin(angle);
+                    b1.vy = vy1 * Math.cos(angle) + vx2 * Math.sin(angle);
+                    b2.vx = vx1 * Math.cos(angle) - vy2 * Math.sin(angle);
+                    b2.vy = vy2 * Math.cos(angle) + vx1 * Math.sin(angle);
+                    let overlap = b1.radius + b2.radius - dist;
+                    b1.x -= overlap * Math.cos(angle) * 0.5; b1.y -= overlap * Math.sin(angle) * 0.5;
+                    b2.x += overlap * Math.cos(angle) * 0.5; b2.y += overlap * Math.sin(angle) * 0.5;
+                }
+            }
+        }
 
         let moving = false;
         balls.forEach(b => {
@@ -225,7 +260,7 @@
         if (!moving && isMoving) {
             isMoving = false; turn = turn === 1 ? 2 : 1;
             updateUI();
-            if (turn === 2) setTimeout(botDecision, 1200);
+            if (turn === 2) setTimeout(botDecision, 1000);
         }
 
         if (!moving && turn === 1) drawCue();
@@ -235,45 +270,38 @@
     function drawCue() {
         const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x);
         
-        // Linha de Mira
+        // Mira
         ctx.beginPath(); ctx.setLineDash([5, 5]);
         ctx.moveTo(whiteBall.x, whiteBall.y);
-        ctx.lineTo(whiteBall.x + Math.cos(angle) * 800, whiteBall.y + Math.sin(angle) * 800);
+        ctx.lineTo(whiteBall.x + Math.cos(angle) * 600, whiteBall.y + Math.sin(angle) * 600);
         ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.stroke(); ctx.setLineDash([]);
 
-        // Taco de Madeira Premium
-        const offset = whiteBall.radius + 15 + (power * 0.8);
+        // Taco
+        const offset = whiteBall.radius + 10 + (power * 0.7);
         ctx.save();
-        ctx.translate(whiteBall.x, whiteBall.y);
-        ctx.rotate(angle + Math.PI);
-        let grad = ctx.createLinearGradient(offset, 0, offset + 400, 0);
+        ctx.translate(whiteBall.x, whiteBall.y); ctx.rotate(angle + Math.PI);
+        let grad = ctx.createLinearGradient(offset, 0, offset+400, 0);
         grad.addColorStop(0, "#f1c40f"); grad.addColorStop(1, "#3e2a1c");
-        ctx.fillStyle = grad;
-        ctx.fillRect(offset, -4, 400, 8);
+        ctx.fillStyle = grad; ctx.fillRect(offset, -5, 400, 10);
         ctx.restore();
     }
 
     function updateUI() {
         document.getElementById('p1-ui').className = turn === 1 ? "player active" : "player";
         document.getElementById('p2-ui').className = turn === 2 ? "player active" : "player";
-        msgCenter.innerText = turn === 1 ? "Sua vez, Joabe! Mira e atira." : "Bot PRO pensando...";
+        msg.innerText = turn === 1 ? "Sua vez, Joabe!" : "Bot PRO pensando...";
     }
 
     function botDecision() {
-        const targets = balls.filter(b => !b.inPocket && (p2Balls ? b.type === p2Balls : b.type !== 'white' && b.type !== 'black'));
-        const target = targets[Math.floor(Math.random() * targets.length)] || balls.find(b => b.num === 8);
-        
+        const targets = balls.filter(b => !b.inPocket && b.type !== 'white');
+        const target = targets[Math.floor(Math.random() * targets.length)];
         const angle = Math.atan2(target.y - whiteBall.y, target.x - whiteBall.x);
-        const botPower = 25 + Math.random() * 20;
-
-        setTimeout(() => {
-            whiteBall.vx = Math.cos(angle) * (botPower/5);
-            whiteBall.vy = Math.sin(angle) * (botPower/5);
-            isMoving = true;
-        }, 1000);
+        whiteBall.vx = Math.cos(angle) * 15;
+        whiteBall.vy = Math.sin(angle) * 15;
+        isMoving = true;
     }
 
-    // Controle de Input
+    // EVENTOS
     window.addEventListener('mousemove', e => {
         const r = canvas.getBoundingClientRect();
         mouseX = e.clientX - r.left; mouseY = e.clientY - r.top;
