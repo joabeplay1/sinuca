@@ -3,66 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>SINUCA PRO | 4K ULTRA HD</title>
+    <title>8 BALL POOL | 4K ULTRA HD PRO</title>
     <style>
         :root {
             --gold: #c5a059;
-            --green-felt: #074a2e;
-            --dark-bg: #050505;
+            --felt: #074a2e;
+            --wood: #2a1b0d;
             --accent: #00ff88;
-            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body, html { 
             margin: 0; padding: 0; overflow: hidden; 
-            background-color: var(--dark-bg);
+            background: radial-gradient(circle at center, #1a1f1c 0%, #050505 100%);
             font-family: 'Segoe UI', Roboto, sans-serif;
             color: white;
         }
 
-        #app-wrapper {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; width: 100vw;
-            background: radial-gradient(circle at center, #1a1f1c 0%, #050505 100%);
-        }
+        #app { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; }
 
-        /* HUD Premium 4K */
+        /* HUD Premium */
         header {
             width: 90%; display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .logo { font-size: 26px; font-weight: bold; letter-spacing: 4px; }
+        .logo { font-size: 24px; font-weight: bold; letter-spacing: 4px; }
         .logo span { display: block; font-size: 10px; color: var(--gold); letter-spacing: 2px; }
 
-        #game-status {
-            display: flex; gap: 40px; background: var(--glass); padding: 15px 40px;
+        #game-hud {
+            display: flex; gap: 30px; background: rgba(255,255,255,0.05); padding: 10px 30px;
             border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .player { text-align: center; transition: 0.3s; opacity: 0.5; }
-        .player.active { opacity: 1; transform: scale(1.1); color: var(--accent); }
-        .group-indicator { font-size: 10px; font-weight: bold; text-transform: uppercase; margin-top: 5px; }
+        .active-p { color: var(--accent); text-shadow: 0 0 10px var(--accent); font-weight: 900; }
 
-        /* Container da Mesa */
-        #main-content { display: flex; align-items: center; gap: 30px; margin-top: 25px; position: relative; }
-
+        /* Mesa Gigante em 4K */
         #table-frame {
             position: relative; padding: 25px;
             background: linear-gradient(145deg, #3d2b1f, #1a110a);
             border-radius: 20px;
-            box-shadow: 0 50px 100px rgba(0,0,0,1), inset 0 0 60px rgba(0,0,0,0.8);
+            box-shadow: 0 50px 100px #000, inset 0 0 60px #000;
             border: 2px solid #2c1e14;
         }
 
-        /* Canvas 4K */
         canvas { 
-            background-color: var(--green-felt); 
+            background-color: var(--felt); 
             display: block; border-radius: 5px; 
             cursor: crosshair;
-            image-rendering: high-quality;
         }
 
-        /* Barra de Força Profissional */
+        /* Barra de Força Lateral */
         #power-ui {
             position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
             height: 300px; width: 15px; background: #000; border-radius: 20px;
@@ -70,65 +58,52 @@
         }
         #power-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--accent), #ffeb3b, #f00); }
 
-        #msg-log { 
-            position: absolute; bottom: -50px; width: 100%; text-align: center;
-            font-size: 13px; color: var(--gold); font-weight: bold; text-shadow: 0 2px 5px #000;
+        #info-msg { 
+            position: absolute; bottom: -45px; width: 100%; text-align: center;
+            font-size: 13px; color: var(--gold); font-weight: bold;
         }
-
-        .ball-in-hand-msg { color: var(--accent); animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
 
-<div id="app-wrapper">
+<div id="app">
     <header>
-        <div class="logo">CINEPLAY <span>ULTRA HD 4K • 8-BALL POOL</span></div>
-        <div id="game-status">
-            <div id="p1-card" class="player active">
-                <div style="font-size:16px; font-weight:900">JOABE PLAY</div>
-                <div id="p1-group" class="group-indicator">ABERTO</div>
-            </div>
-            <div style="font-size:20px; font-weight:900; color:#444">VS</div>
-            <div id="p2-card" class="player">
-                <div style="font-size:16px; font-weight:900">BOT MASTER</div>
-                <div id="p2-group" class="group-indicator"></div>
-            </div>
+        <div class="logo">CINEPLAY <span>ULTRA HD 4K • OFFICIAL RULES</span></div>
+        <div id="game-hud">
+            <div id="p1-card" class="active-p">JOABE PLAY <div id="p1-group" style="font-size:9px">GRUPO: ?</div></div>
+            <div style="font-weight:900; color:#444">VS</div>
+            <div id="p2-card">BOT MASTER <div id="p2-group" style="font-size:9px"></div></div>
         </div>
-        <button onclick="location.reload()" style="background:var(--accent); border:none; padding:10px 20px; border-radius:10px; font-weight:bold; cursor:pointer">REINICIAR</button>
+        <button onclick="location.reload()" style="background:var(--accent); border:none; padding:8px 15px; border-radius:8px; font-weight:bold; cursor:pointer">RESET</button>
     </header>
 
-    <div id="main-content">
+    <div id="main-content" style="position:relative; margin-top:20px;">
         <div id="table-frame">
             <div id="power-ui"><div id="power-fill"></div></div>
             <canvas id="poolCanvas"></canvas>
         </div>
-        <div id="msg-log">ACERTE AS BOLAS PARA DEFINIR SEU GRUPO</div>
+        <div id="info-msg">REGRAS OFICIAIS ATIVADAS</div>
     </div>
 </div>
 
 <script>
     const canvas = document.getElementById('poolCanvas');
     const ctx = canvas.getContext('2d');
-    const powerFill = document.getElementById('power-fill');
-    const log = document.getElementById('msg-log');
+    const powerBar = document.getElementById('power-fill');
 
-    // --- ENGINE DE RESOLUÇÃO 4K ---
+    // --- ENGINE 4K RESOLUTION ---
     const dpr = window.devicePixelRatio || 2;
-    const baseWidth = Math.min(window.innerWidth * 0.8, 1000);
+    const baseWidth = Math.min(window.innerWidth * 0.82, 1050);
     const baseHeight = baseWidth / 2;
-
-    canvas.width = baseWidth * dpr;
-    canvas.height = baseHeight * dpr;
-    canvas.style.width = baseWidth + 'px';
-    canvas.style.height = baseHeight + 'px';
+    canvas.width = baseWidth * dpr; canvas.height = baseHeight * dpr;
+    canvas.style.width = baseWidth + 'px'; canvas.style.height = baseHeight + 'px';
     ctx.scale(dpr, dpr);
 
     // --- VARIÁVEIS DE JOGO ---
-    let ballRadius = baseWidth * 0.022;
+    let ballRadius = baseWidth * 0.022; 
     let balls = [], whiteBall, pockets = [];
     let turn = 1, p1Group = null, isMoving = false, isCharging = false, power = 0;
-    let ballInHand = false, firstCollision = null, mouseX = 0, mouseY = 0;
+    let ballInHand = false, firstBallHit = null, mouseX = 0, mouseY = 0;
 
     class Ball {
         constructor(x, y, radius, color, num, type) {
@@ -140,28 +115,26 @@
         draw() {
             if (this.inPocket) return;
             ctx.save();
-            // Sombras 4K
-            ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
             ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
             ctx.fillStyle = this.color; ctx.fill();
             ctx.shadowBlur = 0;
 
             if (this.type === 'stripe') {
-                ctx.beginPath(); ctx.ellipse(this.x, this.y, this.radius, this.radius*0.55, 0, 0, Math.PI*2);
+                ctx.beginPath(); ctx.ellipse(this.x, this.y, this.radius, this.radius*0.5, 0, 0, Math.PI*2);
                 ctx.fillStyle = "white"; ctx.fill();
             }
 
             if (this.type !== 'white') {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius*0.52, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius*0.5, 0, Math.PI*2);
                 ctx.fillStyle = "white"; ctx.fill();
                 ctx.fillStyle = "black"; ctx.font = `bold ${this.radius*0.8}px Arial`;
                 ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillText(this.num, this.x, this.y);
             }
 
-            // Brilho Profissional
-            let shine = ctx.createRadialGradient(this.x-this.radius*0.4, this.y-this.radius*0.4, 2, this.x, this.y, this.radius);
-            shine.addColorStop(0, "rgba(255,255,255,0.4)"); shine.addColorStop(1, "rgba(0,0,0,0.2)");
+            let shine = ctx.createRadialGradient(this.x-this.radius*0.4, this.y-this.radius*0.4, 1, this.x, this.y, this.radius);
+            shine.addColorStop(0, "rgba(255,255,255,0.4)"); shine.addColorStop(1, "rgba(0,0,0,0.1)");
             ctx.fillStyle = shine; ctx.fill();
             ctx.restore();
         }
@@ -169,7 +142,7 @@
         update() {
             if (this.inPocket) return;
             this.x += this.vx; this.y += this.vy;
-            this.vx *= 0.988; this.vy *= 0.988; // FRICTION 4K
+            this.vx *= 0.988; this.vy *= 0.988;
 
             if (this.x + this.radius > baseWidth || this.x - this.radius < 0) {
                 this.vx *= -0.7; this.x = this.x < this.radius ? this.radius : baseWidth - this.radius;
@@ -183,12 +156,12 @@
         checkPocket() {
             pockets.forEach(p => {
                 const dist = Math.hypot(this.x - p.x, this.y - p.y);
-                if (dist < ballRadius * 2.2) {
-                    this.vx += (p.x - this.x) * 0.2; this.vy += (p.y - this.y) * 0.2;
+                if (dist < ballRadius * 2.2) { // Sucção
+                    this.vx += (p.x - this.x) * 0.15; this.vy += (p.y - this.y) * 0.15;
                 }
                 if (dist < ballRadius * 1.5) {
                     this.inPocket = true; this.vx = 0; this.vy = 0;
-                    handleGameRules(this);
+                    handleRules(this);
                 }
             });
         }
@@ -196,7 +169,7 @@
 
     function setupRack() {
         balls = [];
-        whiteBall = new Ball(baseWidth*0.25, baseHeight/2, ballRadius, "white", 0, "white");
+        whiteBall = new Ball(baseWidth*0.25, baseHeight/2, ballRadius, "#fff", 0, "white");
         balls.push(whiteBall);
         const colors = ["#f1c40f", "#2980b9", "#e74c3c", "#8e44ad", "#d35400", "#27ae60", "#c0392b", "#333"];
         let count = 1;
@@ -211,31 +184,28 @@
         }
     }
 
-    function handleGameRules(ball) {
+    function handleRules(ball) {
         if (ball.type === "white") {
             ballInHand = true;
-            log.innerHTML = "<span class='ball-in-hand-msg'>FALTA! BOLA NA MÃO. Posicione a branca.</span>";
+            document.getElementById('info-msg').innerText = "FALTA! BOLA NA MÃO.";
             setTimeout(() => { ball.inPocket = false; ball.vx = 0; ball.vy = 0; }, 500);
         } else if (ball.type === "black") {
             const rem = balls.filter(b => !b.inPocket && b.type === (turn === 1 ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid'))).length;
-            if (rem > 0) alert("PERDEU! Encaçapou a 8 antes da hora.");
-            else alert(turn === 1 ? "JOABE VENCEU! 🏆" : "BOT VENCEU!");
+            if (rem > 0) alert("PERDEU! Bola 8 encaçapada antes da hora.");
+            else alert(turn === 1 ? "JOABE VENCEU! 🏆" : "BOT MASTER VENCEU!");
             location.reload();
         } else if (!p1Group) {
             p1Group = (turn === 1) ? ball.type : (ball.type === 'solid' ? 'stripe' : 'solid');
-            document.getElementById('p1-group').innerText = p1Group === 'solid' ? 'LISAS' : 'LISTRADAS';
-            document.getElementById('p2-group').innerText = p1Group === 'solid' ? 'LISTRADAS' : 'LISAS';
+            document.getElementById('p1-type').innerText = "GRUPO: " + (p1Group === 'solid' ? 'LISAS' : 'LISTRADAS');
+            document.getElementById('p2-type').innerText = "GRUPO: " + (p1Group === 'solid' ? 'LISTRADAS' : 'LISAS');
         }
     }
 
     function gameLoop() {
         ctx.fillStyle = "#074a2e"; ctx.fillRect(0, 0, baseWidth, baseHeight);
-        
-        // Caçapas 4K
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#000"; // Caçapas
         pockets.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, ballRadius*2.4, 0, Math.PI*2); ctx.fill(); });
 
-        // Colisões de Alta Precisão
         for (let i = 0; i < balls.length; i++) {
             for (let j = i + 1; j < balls.length; j++) {
                 let b1 = balls[i], b2 = balls[j];
@@ -243,7 +213,7 @@
                 let dx = b2.x - b1.x, dy = b2.y - b1.y;
                 let dist = Math.hypot(dx, dy);
                 if (dist < b1.radius + b2.radius) {
-                    if (b1 === whiteBall && !firstCollision) firstCollision = b2;
+                    if (b1 === whiteBall && !firstBallHit) firstBallHit = b2;
                     let angle = Math.atan2(dy, dx);
                     let vx1 = b1.vx * Math.cos(angle) + b1.vy * Math.sin(angle);
                     let vy1 = b1.vy * Math.cos(angle) - b1.vx * Math.sin(angle);
@@ -251,9 +221,9 @@
                     let vy2 = b2.vy * Math.cos(angle) - b2.vx * Math.sin(angle);
                     b1.vx = vx2 * Math.cos(angle) - vy1 * Math.sin(angle); b1.vy = vy1 * Math.cos(angle) + vx2 * Math.sin(angle);
                     b2.vx = vx1 * Math.cos(angle) - vy2 * Math.sin(angle); b2.vy = vy2 * Math.cos(angle) + vx1 * Math.sin(angle);
-                    let overlap = b1.radius + b2.radius - dist;
-                    b1.x -= overlap * Math.cos(angle) * 0.5; b1.y -= overlap * Math.sin(angle) * 0.5;
-                    b2.x += overlap * Math.cos(angle) * 0.5; b2.y += overlap * Math.sin(angle) * 0.5;
+                    let overlap = (b1.radius + b2.radius - dist) / 2;
+                    b1.x -= overlap * Math.cos(angle); b1.y -= overlap * Math.sin(angle);
+                    b2.x += overlap * Math.cos(angle); b2.y += overlap * Math.sin(angle);
                 }
             }
         }
@@ -263,18 +233,20 @@
 
         if (!moving && isMoving) {
             isMoving = false;
-            if (!firstCollision) ballInHand = true; // Falta: não bateu em nada
-            else if (p1Group && firstCollision.type !== (turn === 1 ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid'))) ballInHand = true; // Falta: bola errada
+            // Regra de falta por toque errado
+            if (!firstBallHit) ballInHand = true;
+            else if (p1Group && firstBallHit.type !== (turn === 1 ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid'))) ballInHand = true;
             
-            firstCollision = null;
+            firstBallHit = null;
             turn = turn === 1 ? 2 : 1;
-            updateHUD();
-            if (turn === 2) setTimeout(botDecision, 1200);
+            document.getElementById('p1-card').className = (turn === 1) ? 'active-p' : '';
+            document.getElementById('p2-card').className = (turn === 2) ? 'active-p' : '';
+            if (turn === 2) setTimeout(botMove, 1200);
         }
 
         if (!moving && turn === 1 && !ballInHand) drawCue();
         if (ballInHand && turn === 1) { 
-            whiteBall.x = mouseX; whiteBall.y = mouseY;
+            whiteBall.x = mouseX; whiteBall.y = mouseY; 
             ctx.fillStyle = "rgba(0,255,136,0.1)"; ctx.fillRect(0,0,baseWidth,baseHeight);
         }
 
@@ -288,43 +260,23 @@
         ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
         const offset = whiteBall.radius + 15 + (power * 0.8);
         ctx.save(); ctx.translate(whiteBall.x, whiteBall.y); ctx.rotate(angle + Math.PI);
-        let cueGrad = ctx.createLinearGradient(offset, 0, offset+450, 0);
-        cueGrad.addColorStop(0, var(--gold)); cueGrad.addColorStop(1, "#3e2a10");
-        ctx.fillStyle = cueGrad; ctx.fillRect(offset, -7, 450, 14); ctx.restore();
+        let grad = ctx.createLinearGradient(offset, 0, offset+450, 0);
+        grad.addColorStop(0, "#c5a059"); grad.addColorStop(1, "#3e2a10");
+        ctx.fillStyle = grad; ctx.fillRect(offset, -7, 450, 14); ctx.restore();
     }
 
-    function updateHUD() {
-        document.getElementById('p1-card').className = turn === 1 ? "player active" : "player";
-        document.getElementById('p2-card').className = turn === 2 ? "player active" : "player";
-        if (!ballInHand) log.innerText = turn === 1 ? "SUA VEZ, JOABE!" : "BOT PENSANDO...";
-    }
-
-    function botDecision() {
+    function botMove() {
         if (ballInHand) { whiteBall.x = baseWidth*0.25; whiteBall.y = baseHeight/2; ballInHand = false; }
         const targets = balls.filter(b => !b.inPocket && b.type !== 'white');
         const target = targets[Math.floor(Math.random() * targets.length)];
         const angle = Math.atan2(target.y - whiteBall.y, target.x - whiteBall.x);
-        whiteBall.vx = Math.cos(angle) * 16; whiteBall.vy = Math.sin(angle) * 16; isMoving = true;
+        whiteBall.vx = Math.cos(angle) * 15; whiteBall.vy = Math.sin(angle) * 15; isMoving = true;
     }
 
-    // --- CONTROLES 4K ---
-    window.addEventListener('mousemove', e => { 
-        const r = canvas.getBoundingClientRect(); 
-        mouseX = e.clientX - r.left; mouseY = e.clientY - r.top; 
-    });
-    window.addEventListener('mousedown', () => { 
-        if(ballInHand && turn === 1) { ballInHand = false; log.innerText = "BOLA POSICIONADA!"; }
-        else if(!isMoving && turn === 1) isCharging = true; 
-    });
-    window.addEventListener('mouseup', () => { 
-        if (isCharging) { 
-            const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x);
-            whiteBall.vx = Math.cos(angle) * (power/4.5); whiteBall.vy = Math.sin(angle) * (power/4.5);
-            isCharging = false; power = 0; powerFill.style.height = "0%"; isMoving = true;
-        }
-    });
-
-    setInterval(() => { if(isCharging) { power = Math.min(power+2.5, 100); powerFill.style.height = power+"%"; } }, 16);
+    window.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); mouseX = e.clientX - r.left; mouseY = e.clientY - r.top; });
+    window.addEventListener('mousedown', () => { if(ballInHand && turn === 1) ballInHand = false; else if(!isMoving && turn === 1) isCharging = true; });
+    window.addEventListener('mouseup', () => { if (isCharging) { const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x); whiteBall.vx = Math.cos(angle) * (power/4.5); whiteBall.vy = Math.sin(angle) * (power/4.5); isCharging = false; power = 0; powerBar.style.height = "0%"; isMoving = true; } });
+    setInterval(() => { if(isCharging) { power = Math.min(power+2.5, 100); powerBar.style.height = power+"%"; } }, 16);
 
     pockets = [{x:0,y:0},{x:baseWidth/2,y:0},{x:baseWidth,y:0},{x:0,y:baseHeight},{x:baseWidth/2,y:baseHeight},{x:baseWidth,y:baseHeight}];
     setupRack();
