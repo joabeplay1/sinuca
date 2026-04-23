@@ -1,302 +1,296 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>8 Ball Pool PRO MAX</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>CinePlay 8 Ball Pool PRO</title>
+    <style>
+        :root { --neon: #00ff88; --wood: #2c1e14; --felt: #0b5345; }
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; }
+        
+        #app { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
 
-<style>
-:root{
-    --felt:#0a5c36;
-    --wood:#3b2a1d;
-    --bg:#050505;
-    --neon:#00ff88;
-}
+        /* HUD - Interface de App */
+        #hud {
+            width: 90%; max-width: 1000px; background: rgba(15,15,15,0.95);
+            padding: 15px; border-radius: 20px; border-bottom: 3px solid var(--neon);
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .player { padding: 10px 20px; border-radius: 12px; border: 2px solid transparent; transition: 0.3s; width: 40%; }
+        .active { border-color: var(--neon); background: rgba(0,255,136,0.1); box-shadow: 0 0 15px rgba(0,255,136,0.3); }
+        .name { font-weight: bold; font-size: 1.1em; letter-spacing: 1px; }
+        .ball-group { font-size: 0.8em; color: var(--neon); margin-top: 5px; height: 15px; }
 
-body{
-    margin:0;
-    background:var(--bg);
-    font-family:Arial;
-    color:white;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
+        /* Mesa com Moldura */
+        #table-frame {
+            padding: 20px; background: var(--wood); border-radius: 25px;
+            box-shadow: inset 0 0 40px #000, 0 20px 60px rgba(0,0,0,0.9);
+            position: relative;
+        }
+        canvas { background: var(--felt); border-radius: 10px; display: block; box-shadow: inset 0 0 100px rgba(0,0,0,0.5); }
 
-#hud{
-    width:95%;
-    max-width:1100px;
-    display:flex;
-    justify-content:space-between;
-    margin:10px;
-    background:#111;
-    padding:10px;
-    border-radius:10px;
-}
+        /* Barra de Força Lateral */
+        #power-ui {
+            position: absolute; right: -45px; top: 50%; transform: translateY(-50%);
+            height: 280px; width: 15px; background: #111; border: 2px solid #333; border-radius: 10px; overflow: hidden;
+        }
+        #power-bar { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, #00ff88, #ffeb3b, #f00); transition: height 0.1s; }
 
-.active{
-    border:2px solid var(--neon);
-}
-
-#tableBox{
-    background:var(--wood);
-    padding:20px;
-    border-radius:15px;
-}
-
-canvas{
-    background:var(--felt);
-    border-radius:8px;
-}
-</style>
+        #msg-center { position: absolute; bottom: 25px; background: rgba(0,0,0,0.7); padding: 8px 25px; border-radius: 30px; font-size: 0.9em; border: 1px solid #333; }
+    </style>
 </head>
-
 <body>
 
-<div id="hud">
-    <div id="p1" class="active">👤 JOABE</div>
-    <div>VS</div>
-    <div id="p2">🤖 BOT</div>
-</div>
+<div id="app">
+    <div id="hud">
+        <div id="p1-ui" class="player active">
+            <div class="name">👤 JOABE PLAY</div>
+            <div id="p1-type" class="ball-group">Lisas/Listradas?</div>
+        </div>
+        <div style="font-style: italic; font-weight: 900; color: #444; font-size: 1.5em;">VS</div>
+        <div id="p2-ui" class="player">
+            <div class="name">🤖 BOT PRO</div>
+            <div id="p2-type" class="ball-group"></div>
+        </div>
+    </div>
 
-<div id="tableBox">
-    <canvas id="game"></canvas>
+    <div id="table-frame">
+        <div id="power-ui"><div id="power-bar"></div></div>
+        <canvas id="poolCanvas"></canvas>
+    </div>
+
+    <div id="msg-center">Ajuste sua mira e segure para carregar!</div>
 </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+    const canvas = document.getElementById('poolCanvas');
+    const ctx = canvas.getContext('2d');
+    const powerBar = document.getElementById('power-bar');
+    const msgCenter = document.getElementById('msg-center');
 
-let W,H;
-function resize(){
-    W = Math.min(window.innerWidth*0.95,1200);
-    H = W/2;
-    canvas.width=W;
-    canvas.height=H;
-}
-resize();
-window.addEventListener("resize",resize);
+    // Configurações Físicas e Regras
+    const FRICTION = 0.987;
+    const WALL_BOUNCE = 0.7;
+    let ballRadius, balls = [], whiteBall;
+    let turn = 1; // 1: Joabe, 2: Bot
+    let p1Balls = null, p2Balls = null; // 'solid' ou 'stripe'
+    let isMoving = false, isCharging = false, power = 0, mouseX, mouseY;
 
-const FRICTION=0.985;
-const R = W*0.015;
+    class Ball {
+        constructor(x, y, radius, color, num, type) {
+            this.x = x; this.y = y; this.radius = radius;
+            this.color = color; this.num = num; this.type = type;
+            this.vx = 0; this.vy = 0; this.inPocket = false;
+        }
 
-let balls=[];
-let turn=1;
-let state="aim";
+        draw() {
+            if (this.inPocket) return;
+            
+            // Sombra e Reflexo 3D Profissional
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(this.x + 3, this.y + 3, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fill();
 
-class Ball{
-    constructor(x,y,color,n,type){
-        this.x=x;this.y=y;
-        this.vx=0;this.vy=0;
-        this.color=color;
-        this.n=n;
-        this.type=type;
-        this.in=false;
-    }
-    draw(){
-        if(this.in) return;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
 
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,R,0,Math.PI*2);
-        ctx.fillStyle=this.color;
-        ctx.fill();
+            // Faixa se for listrada
+            if (this.type === 'stripe') {
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y, this.radius, this.radius * 0.5, 0, 0, Math.PI * 2);
+                ctx.fillStyle = "white";
+                ctx.fill();
+            }
 
-        if(this.type!="white"){
-            ctx.fillStyle="#fff";
-            ctx.font=R+"px Arial";
-            ctx.textAlign="center";
-            ctx.textBaseline="middle";
-            ctx.fillText(this.n,this.x,this.y);
+            // Círculo do Número
+            if (this.type !== 'white') {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.5, 0, Math.PI*2);
+                ctx.fillStyle = "white";
+                ctx.fill();
+                ctx.fillStyle = "black";
+                ctx.font = `bold ${this.radius * 0.8}px Arial`;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(this.num, this.x, this.y);
+            }
+
+            // Brilho Premium
+            let grad = ctx.createRadialGradient(this.x - 4, this.y - 4, 1, this.x, this.y, this.radius);
+            grad.addColorStop(0, "rgba(255,255,255,0.5)");
+            grad.addColorStop(1, "rgba(0,0,0,0.2)");
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.restore();
+        }
+
+        update() {
+            if (this.inPocket) return;
+            this.x += this.vx; this.y += this.vy;
+            this.vx *= FRICTION; this.vy *= FRICTION;
+
+            if (Math.abs(this.vx) < 0.1) this.vx = 0;
+            if (Math.abs(this.vy) < 0.1) this.vy = 0;
+
+            // Borda
+            if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                this.vx *= -WALL_BOUNCE;
+                this.x = this.x < this.radius ? this.radius : canvas.width - this.radius;
+            }
+            if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                this.vy *= -WALL_BOUNCE;
+                this.y = this.y < this.radius ? this.radius : canvas.height - this.radius;
+            }
+            this.checkPocket();
+        }
+
+        checkPocket() {
+            const pockets = [
+                {x:0, y:0}, {x:canvas.width/2, y:0}, {x:canvas.width, y:0},
+                {x:0, y:canvas.height}, {x:canvas.width/2, y:canvas.height}, {x:canvas.width, y:canvas.height}
+            ];
+            pockets.forEach(p => {
+                if (Math.hypot(this.x - p.x, this.y - p.y) < ballRadius * 2.2) {
+                    this.inPocket = true; this.vx = 0; this.vy = 0;
+                    handleScoring(this);
+                }
+            });
         }
     }
-    update(){
-        if(this.in) return;
 
-        this.x+=this.vx;
-        this.y+=this.vy;
-
-        this.vx*=FRICTION;
-        this.vy*=FRICTION;
-
-        if(Math.abs(this.vx)<0.05)this.vx=0;
-        if(Math.abs(this.vy)<0.05)this.vy=0;
-
-        if(this.x<R||this.x>W-R) this.vx*=-0.8;
-        if(this.y<R||this.y>H-R) this.vy*=-0.8;
-
-        checkPocket(this);
+    function init() {
+        const w = Math.min(window.innerWidth * 0.85, 1000);
+        canvas.width = w; canvas.height = w / 2;
+        ballRadius = canvas.width * 0.018;
+        setupBalls();
+        loop();
     }
-}
 
-function checkPocket(b){
-    const holes=[
-        [0,0],[W/2,0],[W,0],
-        [0,H],[W/2,H],[W,H]
-    ];
+    function setupBalls() {
+        balls = [];
+        whiteBall = new Ball(canvas.width * 0.25, canvas.height/2, ballRadius, "white", 0, "white");
+        balls.push(whiteBall);
 
-    holes.forEach(h=>{
-        let d=Math.hypot(b.x-h[0],b.y-h[1]);
-        if(d<25){
-            b.in=true;
+        const colors = ["#f1c40f", "#2980b9", "#e74c3c", "#8e44ad", "#d35400", "#27ae60", "#c0392b", "#333"];
+        let count = 1;
+        const startX = canvas.width * 0.7, startY = canvas.height/2;
 
-            // REGRAS
-            if(b.type==="white"){
-                alert("FALTA!");
-                resetWhite();
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j <= i; j++) {
+                let type = count === 8 ? "black" : (count <= 7 ? "solid" : "stripe");
+                let color = count === 8 ? "black" : colors[(count-1) % 7];
+                balls.push(new Ball(startX + (i*ballRadius*1.75), startY + (j*ballRadius*2.1) - (i*ballRadius), ballRadius, color, count, type));
+                count++;
             }
+        }
+    }
 
-            if(b.type==="black"){
-                alert(turn===1?"VOCÊ GANHOU":"BOT GANHOU");
-                setup();
+    function handleScoring(ball) {
+        if (ball.type === "white") {
+            msgCenter.innerText = "BRANCA NA CAÇAPA! Falta.";
+            setTimeout(() => { ball.inPocket = false; ball.x = canvas.width*0.25; ball.y = canvas.height/2; }, 1000);
+        } else if (ball.type === "black") {
+            alert(turn === 1 ? "JOABE VENCEU O JOGO! 🏆" : "O BOT VENCEU! 🤖");
+            location.reload();
+        } else {
+            // Lógica de definir grupo (Lisa ou Listrada)
+            if (!p1Balls) {
+                p1Balls = (turn === 1) ? ball.type : (ball.type === 'solid' ? 'stripe' : 'solid');
+                p2Balls = (p1Balls === 'solid') ? 'stripe' : 'solid';
+                document.getElementById('p1-type').innerText = p1Balls === 'solid' ? "Bolas: LISAS" : "Bolas: LISTRADAS";
+                document.getElementById('p2-type').innerText = p2Balls === 'solid' ? "Bolas: LISAS" : "Bolas: LISTRADAS";
             }
+        }
+    }
+
+    function loop() {
+        ctx.fillStyle = "#0b5345"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Desenhar Caçapas
+        ctx.fillStyle = "#111";
+        const pockets = [{x:0, y:0}, {x:canvas.width/2, y:0}, {x:canvas.width, y:0}, {x:0, y:canvas.height}, {x:canvas.width/2, y:canvas.height}, {x:canvas.width, y:canvas.height}];
+        pockets.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, ballRadius*2.2, 0, Math.PI*2); ctx.fill(); });
+
+        let moving = false;
+        balls.forEach(b => {
+            b.update(); b.draw();
+            if (b.vx !== 0 || b.vy !== 0) moving = true;
+        });
+
+        if (!moving && isMoving) {
+            isMoving = false; turn = turn === 1 ? 2 : 1;
+            updateUI();
+            if (turn === 2) setTimeout(botDecision, 1200);
+        }
+
+        if (!moving && turn === 1) drawCue();
+        requestAnimationFrame(loop);
+    }
+
+    function drawCue() {
+        const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x);
+        
+        // Linha de Mira
+        ctx.beginPath(); ctx.setLineDash([5, 5]);
+        ctx.moveTo(whiteBall.x, whiteBall.y);
+        ctx.lineTo(whiteBall.x + Math.cos(angle) * 800, whiteBall.y + Math.sin(angle) * 800);
+        ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.stroke(); ctx.setLineDash([]);
+
+        // Taco de Madeira Premium
+        const offset = whiteBall.radius + 15 + (power * 0.8);
+        ctx.save();
+        ctx.translate(whiteBall.x, whiteBall.y);
+        ctx.rotate(angle + Math.PI);
+        let grad = ctx.createLinearGradient(offset, 0, offset + 400, 0);
+        grad.addColorStop(0, "#f1c40f"); grad.addColorStop(1, "#3e2a1c");
+        ctx.fillStyle = grad;
+        ctx.fillRect(offset, -4, 400, 8);
+        ctx.restore();
+    }
+
+    function updateUI() {
+        document.getElementById('p1-ui').className = turn === 1 ? "player active" : "player";
+        document.getElementById('p2-ui').className = turn === 2 ? "player active" : "player";
+        msgCenter.innerText = turn === 1 ? "Sua vez, Joabe! Mira e atira." : "Bot PRO pensando...";
+    }
+
+    function botDecision() {
+        const targets = balls.filter(b => !b.inPocket && (p2Balls ? b.type === p2Balls : b.type !== 'white' && b.type !== 'black'));
+        const target = targets[Math.floor(Math.random() * targets.length)] || balls.find(b => b.num === 8);
+        
+        const angle = Math.atan2(target.y - whiteBall.y, target.x - whiteBall.x);
+        const botPower = 25 + Math.random() * 20;
+
+        setTimeout(() => {
+            whiteBall.vx = Math.cos(angle) * (botPower/5);
+            whiteBall.vy = Math.sin(angle) * (botPower/5);
+            isMoving = true;
+        }, 1000);
+    }
+
+    // Controle de Input
+    window.addEventListener('mousemove', e => {
+        const r = canvas.getBoundingClientRect();
+        mouseX = e.clientX - r.left; mouseY = e.clientY - r.top;
+    });
+    window.addEventListener('mousedown', () => { if(!isMoving && turn === 1) isCharging = true; });
+    window.addEventListener('mouseup', () => {
+        if (isCharging) {
+            const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x);
+            whiteBall.vx = Math.cos(angle) * (power/5);
+            whiteBall.vy = Math.sin(angle) * (power/5);
+            isCharging = false; power = 0; powerBar.style.height = "0%"; isMoving = true;
         }
     });
-}
 
-function resetWhite(){
-    let w=balls[0];
-    w.in=false;
-    w.x=W*0.3;
-    w.y=H/2;
-    w.vx=0;w.vy=0;
-}
+    setInterval(() => { if(isCharging) { power = Math.min(power+2, 100); powerBar.style.height = power+"%"; } }, 20);
 
-function setup(){
-    balls=[];
-
-    balls.push(new Ball(W*0.3,H/2,"#fff",0,"white"));
-
-    let colors=["yellow","blue","red","purple","orange","green","brown"];
-    let n=1;
-
-    for(let i=0;i<5;i++){
-        for(let j=0;j<=i;j++){
-            let x=W*0.7+i*R*2;
-            let y=H/2+(j-i/2)*R*2;
-
-            let type=n<=7?"solid":(n==8?"black":"stripe");
-            let c=n==8?"black":colors[(n-1)%7];
-
-            balls.push(new Ball(x,y,c,n,type));
-            n++;
-        }
-    }
-}
-setup();
-
-function collide(){
-    for(let i=0;i<balls.length;i++){
-        for(let j=i+1;j<balls.length;j++){
-            let a=balls[i],b=balls[j];
-            if(a.in||b.in) continue;
-
-            let dx=b.x-a.x;
-            let dy=b.y-a.y;
-            let d=Math.hypot(dx,dy);
-
-            if(d<R*2){
-                let angle=Math.atan2(dy,dx);
-                let force=0.5;
-
-                a.vx-=Math.cos(angle)*force;
-                a.vy-=Math.sin(angle)*force;
-
-                b.vx+=Math.cos(angle)*force;
-                b.vy+=Math.sin(angle)*force;
-            }
-        }
-    }
-}
-
-let mouse={x:0,y:0};
-canvas.addEventListener("mousemove",e=>{
-    let r=canvas.getBoundingClientRect();
-    mouse.x=e.clientX-r.left;
-    mouse.y=e.clientY-r.top;
-});
-
-let power=0;
-let charging=false;
-
-canvas.addEventListener("mousedown",()=>{
-    if(state==="aim"&&turn===1) charging=true;
-});
-
-canvas.addEventListener("mouseup",()=>{
-    if(charging){
-        let w=balls[0];
-        let a=Math.atan2(mouse.y-w.y,mouse.x-w.x);
-
-        w.vx=Math.cos(a)*power/5;
-        w.vy=Math.sin(a)*power/5;
-
-        charging=false;
-        power=0;
-        state="move";
-    }
-});
-
-function drawAim(){
-    let w=balls[0];
-    let a=Math.atan2(mouse.y-w.y,mouse.x-w.x);
-
-    ctx.setLineDash([5,5]);
-    ctx.beginPath();
-    ctx.moveTo(w.x,w.y);
-    ctx.lineTo(w.x+Math.cos(a)*1000,w.y+Math.sin(a)*1000);
-    ctx.strokeStyle="rgba(255,255,255,0.3)";
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-function bot(){
-    let w=balls[0];
-    let target=balls.find(b=>!b.in&&b.type!=="white"&&b.type!=="black");
-
-    if(!target) return;
-
-    let a=Math.atan2(target.y-w.y,target.x-w.x);
-
-    w.vx=Math.cos(a)*8;
-    w.vy=Math.sin(a)*8;
-
-    state="move";
-}
-
-function loop(){
-    ctx.clearRect(0,0,W,H);
-
-    collide();
-
-    let moving=false;
-
-    balls.forEach(b=>{
-        b.update();
-        b.draw();
-        if(b.vx||b.vy) moving=true;
-    });
-
-    if(state==="aim"&&turn===1) drawAim();
-
-    if(!moving && state==="move"){
-        state="aim";
-        turn = turn===1?2:1;
-
-        document.getElementById("p1").className = turn===1?"active":"";
-        document.getElementById("p2").className = turn===2?"active":"";
-
-        if(turn===2) setTimeout(bot,800);
-    }
-
-    if(charging){
-        power=Math.min(power+2,100);
-    }
-
-    requestAnimationFrame(loop);
-}
-
-loop();
+    init();
 </script>
-
 </body>
 </html>
