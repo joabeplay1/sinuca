@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>8 BALL POOL | 4K ULTRA HD PRO</title>
+    <title>CinePlay 8 Ball | REGRAS OFICIAIS</title>
     <style>
         :root {
             --gold: #c5a059;
             --felt: #074a2e;
             --wood: #2a1b0d;
             --accent: #00ff88;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body, html { 
@@ -19,28 +20,30 @@
             color: white;
         }
 
-        #app { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; }
-
-        /* HUD Premium */
-        header {
-            width: 90%; display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+        #app-wrapper {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; width: 100vw;
         }
-        .logo { font-size: 24px; font-weight: bold; letter-spacing: 4px; }
+
+        header {
+            width: 95%; display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .logo { font-size: 26px; font-weight: bold; letter-spacing: 4px; }
         .logo span { display: block; font-size: 10px; color: var(--gold); letter-spacing: 2px; }
 
         #game-hud {
-            display: flex; gap: 30px; background: rgba(255,255,255,0.05); padding: 10px 30px;
+            display: flex; gap: 30px; background: var(--glass); padding: 12px 40px;
             border-radius: 50px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .active-p { color: var(--accent); text-shadow: 0 0 10px var(--accent); font-weight: 900; }
+        .active-p { color: var(--accent); text-shadow: 0 0 15px var(--accent); font-weight: 900; }
 
-        /* Mesa Gigante em 4K */
         #table-frame {
-            position: relative; padding: 25px;
+            position: relative; padding: 20px;
             background: linear-gradient(145deg, #3d2b1f, #1a110a);
-            border-radius: 20px;
-            box-shadow: 0 50px 100px #000, inset 0 0 60px #000;
+            border-radius: 15px;
+            box-shadow: 0 40px 100px #000, inset 0 0 60px #000;
             border: 2px solid #2c1e14;
         }
 
@@ -50,31 +53,30 @@
             cursor: crosshair;
         }
 
-        /* Barra de Força Lateral */
         #power-ui {
-            position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
-            height: 300px; width: 15px; background: #000; border-radius: 20px;
-            border: 1px solid #333; overflow: hidden;
+            position: absolute; right: -35px; top: 50%; transform: translateY(-50%);
+            height: 300px; width: 12px; background: #000; border-radius: 20px;
+            border: 1px solid #444; overflow: hidden;
         }
         #power-fill { position: absolute; bottom: 0; width: 100%; height: 0%; background: linear-gradient(to top, var(--accent), #ffeb3b, #f00); }
 
-        #info-msg { 
+        #msg-log { 
             position: absolute; bottom: -45px; width: 100%; text-align: center;
-            font-size: 13px; color: var(--gold); font-weight: bold;
+            font-size: 14px; color: var(--gold); font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-<div id="app">
+<div id="app-wrapper">
     <header>
-        <div class="logo">CINEPLAY <span>ULTRA HD 4K • OFFICIAL RULES</span></div>
+        <div class="logo">CINEPLAY <span>ULTRA HD 4K • REGRAS OFICIAIS</span></div>
         <div id="game-hud">
             <div id="p1-card" class="active-p">JOABE PLAY <div id="p1-group" style="font-size:9px">GRUPO: ?</div></div>
             <div style="font-weight:900; color:#444">VS</div>
             <div id="p2-card">BOT MASTER <div id="p2-group" style="font-size:9px"></div></div>
         </div>
-        <button onclick="location.reload()" style="background:var(--accent); border:none; padding:8px 15px; border-radius:8px; font-weight:bold; cursor:pointer">RESET</button>
+        <button onclick="location.reload()" style="background:var(--accent); border:none; padding:8px 15px; border-radius:10px; font-weight:bold; cursor:pointer">RESET</button>
     </header>
 
     <div id="main-content" style="position:relative; margin-top:20px;">
@@ -82,7 +84,7 @@
             <div id="power-ui"><div id="power-fill"></div></div>
             <canvas id="poolCanvas"></canvas>
         </div>
-        <div id="info-msg">REGRAS OFICIAIS ATIVADAS</div>
+        <div id="msg-log">ACERTE UMA BOLA PARA DEFINIR SEU GRUPO</div>
     </div>
 </div>
 
@@ -90,20 +92,22 @@
     const canvas = document.getElementById('poolCanvas');
     const ctx = canvas.getContext('2d');
     const powerBar = document.getElementById('power-fill');
+    const log = document.getElementById('msg-log');
 
-    // --- ENGINE 4K RESOLUTION ---
+    // --- ENGINE 4K ULTRA HD ---
     const dpr = window.devicePixelRatio || 2;
-    const baseWidth = Math.min(window.innerWidth * 0.82, 1050);
+    const baseWidth = Math.min(window.innerWidth * 0.92, 1200); 
     const baseHeight = baseWidth / 2;
+
     canvas.width = baseWidth * dpr; canvas.height = baseHeight * dpr;
     canvas.style.width = baseWidth + 'px'; canvas.style.height = baseHeight + 'px';
     ctx.scale(dpr, dpr);
 
-    // --- VARIÁVEIS DE JOGO ---
-    let ballRadius = baseWidth * 0.022; 
+    // --- LÓGICA DE JOGO ---
+    let ballRadius = baseWidth * 0.022;
     let balls = [], whiteBall, pockets = [];
     let turn = 1, p1Group = null, isMoving = false, isCharging = false, power = 0;
-    let ballInHand = false, firstBallHit = null, mouseX = 0, mouseY = 0;
+    let ballInHand = false, firstBallTouched = null, mouseX = 0, mouseY = 0;
 
     class Ball {
         constructor(x, y, radius, color, num, type) {
@@ -115,26 +119,26 @@
         draw() {
             if (this.inPocket) return;
             ctx.save();
-            ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 10;
+            ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 15;
             ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
             ctx.fillStyle = this.color; ctx.fill();
             ctx.shadowBlur = 0;
 
             if (this.type === 'stripe') {
-                ctx.beginPath(); ctx.ellipse(this.x, this.y, this.radius, this.radius*0.5, 0, 0, Math.PI*2);
+                ctx.beginPath(); ctx.ellipse(this.x, this.y, this.radius, this.radius*0.55, 0, 0, Math.PI*2);
                 ctx.fillStyle = "white"; ctx.fill();
             }
 
             if (this.type !== 'white') {
-                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius*0.5, 0, Math.PI*2);
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius*0.52, 0, Math.PI*2);
                 ctx.fillStyle = "white"; ctx.fill();
                 ctx.fillStyle = "black"; ctx.font = `bold ${this.radius*0.8}px Arial`;
                 ctx.textAlign = "center"; ctx.textBaseline = "middle";
                 ctx.fillText(this.num, this.x, this.y);
             }
 
-            let shine = ctx.createRadialGradient(this.x-this.radius*0.4, this.y-this.radius*0.4, 1, this.x, this.y, this.radius);
-            shine.addColorStop(0, "rgba(255,255,255,0.4)"); shine.addColorStop(1, "rgba(0,0,0,0.1)");
+            let shine = ctx.createRadialGradient(this.x-this.radius*0.4, this.y-this.radius*0.4, 2, this.x, this.y, this.radius);
+            shine.addColorStop(0, "rgba(255,255,255,0.4)"); shine.addColorStop(1, "rgba(0,0,0,0.2)");
             ctx.fillStyle = shine; ctx.fill();
             ctx.restore();
         }
@@ -156,9 +160,7 @@
         checkPocket() {
             pockets.forEach(p => {
                 const dist = Math.hypot(this.x - p.x, this.y - p.y);
-                if (dist < ballRadius * 2.2) { // Sucção
-                    this.vx += (p.x - this.x) * 0.15; this.vy += (p.y - this.y) * 0.15;
-                }
+                if (dist < ballRadius * 2.2) { this.vx += (p.x - this.x) * 0.15; this.vy += (p.y - this.y) * 0.15; }
                 if (dist < ballRadius * 1.5) {
                     this.inPocket = true; this.vx = 0; this.vy = 0;
                     handleRules(this);
@@ -171,7 +173,7 @@
         balls = [];
         whiteBall = new Ball(baseWidth*0.25, baseHeight/2, ballRadius, "#fff", 0, "white");
         balls.push(whiteBall);
-        const colors = ["#f1c40f", "#2980b9", "#e74c3c", "#8e44ad", "#d35400", "#27ae60", "#c0392b", "#333"];
+        const colors = ["#f1c40f", "#2980b9", "#e74c3c", "#8e44ad", "#d35400", "#27ae60", "#c0392b", "#000"];
         let count = 1;
         const startX = baseWidth * 0.7, startY = baseHeight/2;
         for (let i = 0; i < 5; i++) {
@@ -187,24 +189,23 @@
     function handleRules(ball) {
         if (ball.type === "white") {
             ballInHand = true;
-            document.getElementById('info-msg').innerText = "FALTA! BOLA NA MÃO.";
+            log.innerText = "FALTA! BOLA NA MÃO.";
             setTimeout(() => { ball.inPocket = false; ball.vx = 0; ball.vy = 0; }, 500);
         } else if (ball.type === "black") {
-            const rem = balls.filter(b => !b.inPocket && b.type === (turn === 1 ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid'))).length;
-            if (rem > 0) alert("PERDEU! Bola 8 encaçapada antes da hora.");
-            else alert(turn === 1 ? "JOABE VENCEU! 🏆" : "BOT MASTER VENCEU!");
+            const myBalls = balls.filter(b => !b.inPocket && b.type === (turn === 1 ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid'))).length;
+            if (myBalls > 0) alert("DERROTA! Encaçapou a 8 antes da hora.");
+            else alert(turn === 1 ? "JOABE PLAY VENCEU! 🏆" : "BOT VENCEU!");
             location.reload();
         } else if (!p1Group) {
             p1Group = (turn === 1) ? ball.type : (ball.type === 'solid' ? 'stripe' : 'solid');
-            document.getElementById('p1-type').innerText = "GRUPO: " + (p1Group === 'solid' ? 'LISAS' : 'LISTRADAS');
-            document.getElementById('p2-type').innerText = "GRUPO: " + (p1Group === 'solid' ? 'LISTRADAS' : 'LISAS');
+            document.getElementById('p1-group').innerText = "GRUPO: " + (p1Group === 'solid' ? 'LISAS' : 'LISTRADAS');
+            document.getElementById('p2-group').innerText = "GRUPO: " + (p1Group === 'solid' ? 'LISTRADAS' : 'LISAS');
         }
     }
 
     function gameLoop() {
         ctx.fillStyle = "#074a2e"; ctx.fillRect(0, 0, baseWidth, baseHeight);
-        ctx.fillStyle = "#000"; // Caçapas
-        pockets.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, ballRadius*2.4, 0, Math.PI*2); ctx.fill(); });
+        ctx.fillStyle = "#000"; pockets.forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, ballRadius*2.4, 0, Math.PI*2); ctx.fill(); });
 
         for (let i = 0; i < balls.length; i++) {
             for (let j = i + 1; j < balls.length; j++) {
@@ -213,7 +214,7 @@
                 let dx = b2.x - b1.x, dy = b2.y - b1.y;
                 let dist = Math.hypot(dx, dy);
                 if (dist < b1.radius + b2.radius) {
-                    if (b1 === whiteBall && !firstBallHit) firstBallHit = b2;
+                    if (b1 === whiteBall && !firstBallTouched) firstBallTouched = b2;
                     let angle = Math.atan2(dy, dx);
                     let vx1 = b1.vx * Math.cos(angle) + b1.vy * Math.sin(angle);
                     let vy1 = b1.vy * Math.cos(angle) - b1.vx * Math.sin(angle);
@@ -233,23 +234,23 @@
 
         if (!moving && isMoving) {
             isMoving = false;
-            // Regra de falta por toque errado
-            if (!firstBallHit) ballInHand = true;
-            else if (p1Group && firstBallHit.type !== (turn === 1 ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid'))) ballInHand = true;
-            
-            firstBallHit = null;
+            const currentPlayerGroup = (turn === 1) ? p1Group : (p1Group === 'solid' ? 'stripe' : 'solid');
+            // Verifica Falta: Não tocar em nada OU tocar na bola errada primeiro
+            if (!firstBallTouched || (currentPlayerGroup && firstBallTouched.type !== currentPlayerGroup)) {
+                ballInHand = true;
+                log.innerText = "FALTA! TOQUE ILEGAL. BOLA NA MÃO.";
+            }
+            firstBallTouched = null;
             turn = turn === 1 ? 2 : 1;
-            document.getElementById('p1-card').className = (turn === 1) ? 'active-p' : '';
-            document.getElementById('p2-card').className = (turn === 2) ? 'active-p' : '';
-            if (turn === 2) setTimeout(botMove, 1200);
+            updateHUD();
+            if (turn === 2) setTimeout(botDecision, 1200);
         }
 
         if (!moving && turn === 1 && !ballInHand) drawCue();
         if (ballInHand && turn === 1) { 
-            whiteBall.x = mouseX; whiteBall.y = mouseY; 
+            whiteBall.x = mouseX; whiteBall.y = mouseY;
             ctx.fillStyle = "rgba(0,255,136,0.1)"; ctx.fillRect(0,0,baseWidth,baseHeight);
         }
-
         requestAnimationFrame(gameLoop);
     }
 
@@ -260,23 +261,42 @@
         ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
         const offset = whiteBall.radius + 15 + (power * 0.8);
         ctx.save(); ctx.translate(whiteBall.x, whiteBall.y); ctx.rotate(angle + Math.PI);
-        let grad = ctx.createLinearGradient(offset, 0, offset+450, 0);
-        grad.addColorStop(0, "#c5a059"); grad.addColorStop(1, "#3e2a10");
-        ctx.fillStyle = grad; ctx.fillRect(offset, -7, 450, 14); ctx.restore();
+        let cueGrad = ctx.createLinearGradient(offset, 0, offset+450, 0);
+        cueGrad.addColorStop(0, var(--gold)); cueGrad.addColorStop(1, "#3e2a10");
+        ctx.fillStyle = cueGrad; ctx.fillRect(offset, -7, 450, 14); ctx.restore();
     }
 
-    function botMove() {
+    function updateHUD() {
+        document.getElementById('p1-card').className = (turn === 1) ? 'active-p' : '';
+        document.getElementById('p2-card').className = (turn === 2) ? 'active-p' : '';
+        if (!ballInHand) log.innerText = turn === 1 ? "SUA VEZ, JOABE!" : "BOT MASTER PENSANDO...";
+    }
+
+    function botDecision() {
         if (ballInHand) { whiteBall.x = baseWidth*0.25; whiteBall.y = baseHeight/2; ballInHand = false; }
         const targets = balls.filter(b => !b.inPocket && b.type !== 'white');
         const target = targets[Math.floor(Math.random() * targets.length)];
         const angle = Math.atan2(target.y - whiteBall.y, target.x - whiteBall.x);
-        whiteBall.vx = Math.cos(angle) * 15; whiteBall.vy = Math.sin(angle) * 15; isMoving = true;
+        whiteBall.vx = Math.cos(angle) * 16; whiteBall.vy = Math.sin(angle) * 16; isMoving = true;
     }
 
-    window.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); mouseX = e.clientX - r.left; mouseY = e.clientY - r.top; });
-    window.addEventListener('mousedown', () => { if(ballInHand && turn === 1) ballInHand = false; else if(!isMoving && turn === 1) isCharging = true; });
-    window.addEventListener('mouseup', () => { if (isCharging) { const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x); whiteBall.vx = Math.cos(angle) * (power/4.5); whiteBall.vy = Math.sin(angle) * (power/4.5); isCharging = false; power = 0; powerBar.style.height = "0%"; isMoving = true; } });
-    setInterval(() => { if(isCharging) { power = Math.min(power+2.5, 100); powerBar.style.height = power+"%"; } }, 16);
+    window.addEventListener('mousemove', e => { 
+        const r = canvas.getBoundingClientRect(); 
+        mouseX = e.clientX - r.left; mouseY = e.clientY - r.top; 
+    });
+    window.addEventListener('mousedown', () => { 
+        if(ballInHand && turn === 1) { ballInHand = false; log.innerText = "BOLA POSICIONADA!"; }
+        else if(!isMoving && turn === 1) isCharging = true; 
+    });
+    window.addEventListener('mouseup', () => { 
+        if (isCharging) { 
+            const angle = Math.atan2(mouseY - whiteBall.y, mouseX - whiteBall.x);
+            whiteBall.vx = Math.cos(angle) * (power/4.5); whiteBall.vy = Math.sin(angle) * (power/4.5);
+            isCharging = false; power = 0; document.getElementById('power-fill').style.height = "0%"; isMoving = true;
+        }
+    });
+
+    setInterval(() => { if(isCharging) { power = Math.min(power+2.5, 100); document.getElementById('power-fill').style.height = power+"%"; } }, 16);
 
     pockets = [{x:0,y:0},{x:baseWidth/2,y:0},{x:baseWidth,y:0},{x:0,y:baseHeight},{x:baseWidth/2,y:baseHeight},{x:baseWidth,y:baseHeight}];
     setupRack();
