@@ -1,0 +1,66 @@
+:root {
+    --bg-black: #09090b;
+    --bg-glass: rgba(255, 255, 255, 0.05);
+    --purple-neon: #8b5cf6;
+    --text-gray: #a1a1aa;
+}
+
+body {
+    background-color: var(--bg-black);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    overflow: hidden;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 260px 1fr 300px;
+    height: 100vh;
+}
+
+/* Sidebar e Painel Direito */
+.sidebar, .right-panel {
+    background-color: #121214;
+    padding: 20px;
+    border: 1px solid #27272a;
+}
+
+.logo { color: var(--purple-neon); margin-bottom: 30px; }
+
+.section-title { font-size: 11px; color: var(--text-gray); letter-spacing: 1px; }
+
+/* Upload Area */
+.upload-area { display: flex; flex-direction: column; gap: 10px; }
+input, textarea { background: #1c1c1f; border: none; padding: 10px; color: white; border-radius: 8px; }
+.file-btn { background: #27272a; padding: 8px; text-align: center; border-radius: 8px; cursor: pointer; font-size: 13px; }
+#btnPostar { background: var(--purple-neon); border: none; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+/* Main Content */
+.main-content { padding: 30px; overflow-y: auto; background: linear-gradient(180deg, #121214 0%, #09090b 100%); }
+
+.banner {
+    background: linear-gradient(90deg, #4c1d95, #8b5cf6);
+    border-radius: 20px;
+    padding: 60px;
+    margin-top: 20px;
+}
+
+.music-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; margin-top: 20px; }
+
+/* Card Estilo Glass */
+.card {
+    background: var(--bg-glass);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
+    cursor: pointer;
+}
+.card:hover { background: rgba(255, 255, 255, 0.1); }
+.card img { width: 100%; border-radius: 10px; margin-bottom: 10px; }
+
+/* Painel Tocando Agora */
+.display-capa { width: 100%; aspect-ratio: 1; border-radius: 15px; background-size: cover; margin: 15px 0; background-color: #27272a; }
+audio { width: 100%; filter: invert(1); margin-top: 20px; }
