@@ -16,14 +16,11 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            display: flex; 
-            height: 100vh; 
-            overflow: hidden; 
-            position: relative; 
-        }
+       body { 
+    background: radial-gradient(circle at center, #1a0b2e 0%, #050508 70%);
+    color: var(--text-main); 
+    /* ... mantenha o resto das propriedades do body ... */
+}
 
         /* --- CANVAS DE FUNDO --- */
         #particle-canvas {
@@ -59,7 +56,24 @@
         .playlist-item { padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-muted); transition: 0.3s; }
         .playlist-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
 
-        /* VÍDEO */
+       /* VÍDEO */
+        .circulo-central {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 5;
+    pointer-events: none;
+    color: white;
+    font-size: 80px;
+    /* Aqui está o super brilho que você pediu: */
+    text-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-pink);
+    animation: girarNota 12s linear infinite;
+}
+
+@keyframes girarNota {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
         #video-container { position: absolute; bottom: 120px; right: 40px; width: 400px; aspect-ratio: 16/9; background: #000; border-radius: 10px; border: 1px solid var(--neon-blue); box-shadow: 0 0 20px rgba(0,240,255,0.3); display: none; z-index: 15; overflow: hidden; }
         video, iframe { width: 100%; height: 100%; border: none; }
 
@@ -103,6 +117,7 @@
                 <li><a href="#" id="btn-biblioteca"><i class="fas fa-book"></i> Biblioteca</a></li>
                 <li><button class="add-btn" id="btn-abrir-modal"><i class="fas fa-lock"></i> Área Admin</button></li>
             </ul>
+            <div class="circulo-central"><i class="fas fa-music"></i></div> 🎵
         </nav>
     </aside>
 
@@ -185,7 +200,7 @@
                 this.vx = (Math.random() - 0.5) * 2;
                 this.vy = (Math.random() - 0.5) * 2;
                 // AJUSTE: Partículas maiores e mais impactantes
-                this.size = Math.random() * 8 + 4; 
+              this.size = Math.random() * 15 + 5;
                 this.color = Math.random() > 0.5 ? '#ff007f' : '#00f0ff';
                 this.isNote = Math.random() > 0.8;
                 this.noteChar = Math.random() > 0.5 ? '♪' : '♫';
