@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jesus Reina - Player Local & Drive</title>
+    <title>Jesus Reina - Player Total</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -13,11 +13,9 @@
             --text-main: #ffffff;
             --text-muted: #888888;
             --purple-main: #8a2be2;
-            --purple-hover: #9932cc;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         /* SIDEBAR */
@@ -28,34 +26,32 @@
         .main-nav a, .add-btn { text-decoration: none; color: var(--text-muted); display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; background: none; border: none; width: 100%; font-size: 1rem; }
         .main-nav a:hover, .add-btn:hover { color: #fff; }
 
-        /* CONTENT AREA */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        /* CONTENT */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 120px; }
         .search-bar { background: #1a1a1a; border-radius: 25px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; width: 400px; }
         .search-bar input { background: none; border: none; color: #fff; width: 100%; outline: none; }
 
         /* VIDEO VIEWPORT */
         #video-container { width: 100%; max-width: 800px; background: #000; border-radius: 12px; aspect-ratio: 16/9; display: none; margin: 0 auto; overflow: hidden; border: 2px solid #222; }
-        video { width: 100%; height: 100%; }
+        video, iframe { width: 100%; height: 100%; border: none; }
 
         .playlist-container { background: var(--bg-card); border-radius: 12px; padding: 20px; }
         .playlist-list { list-style: none; margin-top: 15px; }
-        .playlist-item { padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; margin-bottom: 5px; }
+        .playlist-item { padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
         .playlist-item:hover { background: #222; }
         .playlist-item.active { background: #2a2a2a; border-left: 4px solid var(--purple-main); }
 
         /* FOOTER PLAYER */
-        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: #111; border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; }
+        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: #111; border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 10; }
         .controls { display: flex; align-items: center; gap: 20px; }
         .controls button { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; }
         #play-pause { background: #fff; color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .progress-container { flex: 1; margin: 0 40px; display: flex; align-items: center; gap: 10px; }
-        #progress-bar { flex: 1; accent-color: var(--purple-main); cursor: pointer; }
 
         /* MODAL */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
         .modal-content { background: var(--bg-modal); padding: 30px; border-radius: 15px; width: 450px; }
         .modal-content input, .modal-content select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; }
-        .btn-save { background: var(--purple-main); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-save { background: var(--purple-main); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -65,8 +61,8 @@
         <nav class="main-nav">
             <ul>
                 <li><a href="#" onclick="location.reload()"><i class="fas fa-home"></i> Início</a></li>
-                <li><a href="#" id="link-biblioteca"><i class="fas fa-book"></i> Biblioteca</a></li>
-                <li><button class="add-btn" id="btn-modal"><i class="fas fa-plus-circle"></i> Adicionar</button></li>
+                <li><a href="#" id="btn-biblioteca"><i class="fas fa-book"></i> Biblioteca</a></li>
+                <li><button class="add-btn" id="btn-abrir-modal"><i class="fas fa-plus-circle"></i> Adicionar</button></li>
             </ul>
         </nav>
     </aside>
@@ -74,56 +70,50 @@
     <main class="main-content">
         <div class="search-bar">
             <i class="fas fa-search"></i>
-            <input type="text" id="busca" placeholder="O que deseja ouvir ou ver?">
+            <input type="text" id="input-busca" placeholder="Buscar na tua coleção...">
         </div>
 
         <div id="video-container">
-            <video id="main-video" controls></video>
+            <video id="main-video" controls style="display:none;"></video>
+            <iframe id="drive-player" style="display:none;"></iframe>
         </div>
 
         <div class="playlist-container" id="secao-biblioteca">
-            <h2>Ficheiros Adicionados</h2>
-            <ul class="playlist-list" id="playlist-lista">
-                </ul>
+            <h2>Itens Adicionados</h2>
+            <ul class="playlist-list" id="lista-playlist"></ul>
         </div>
     </main>
 
     <footer class="footer-player">
-        <div style="width: 200px;">
-            <div id="track-title" style="font-weight: bold;">Título</div>
-            <div id="track-info" style="font-size: 0.8rem; color: #888;">Informação</div>
-        </div>
-
-        <div class="progress-container">
-            <span id="time-current">0:00</span>
-            <input type="range" id="progress-bar" value="0">
-            <span id="time-total">0:00</span>
+        <div style="width: 250px;">
+            <div id="track-title" style="font-weight: bold;">Nada a tocar</div>
+            <div id="track-type" style="font-size: 0.8rem; color: #888;">Adiciona um ficheiro</div>
         </div>
 
         <div class="controls">
-            <button id="prev"><i class="fas fa-step-backward"></i></button>
+            <button id="btn-prev"><i class="fas fa-step-backward"></i></button>
             <button id="play-pause"><i class="fas fa-play"></i></button>
-            <button id="next"><i class="fas fa-step-forward"></i></button>
+            <button id="btn-next"><i class="fas fa-step-forward"></i></button>
+        </div>
+
+        <div style="width: 250px; text-align: right; color: var(--purple-main);">
+            <i class="fas fa-volume-up"></i>
         </div>
     </footer>
 
-    <div class="modal" id="modal">
+    <div class="modal" id="modal-add">
         <div class="modal-content">
-            <h3>Novo Item</h3>
-            <form id="add-form">
-                <input type="text" id="input-titulo" placeholder="Nome da música ou vídeo" required>
-                <select id="select-tipo">
-                    <option value="audio">Música (Áudio)</option>
-                    <option value="video">Vídeo</option>
+            <h3>Adicionar Música ou Vídeo</h3>
+            <form id="form-add">
+                <input type="text" id="add-titulo" placeholder="Nome do item" required>
+                <select id="add-origem">
+                    <option value="drive">Link do Google Drive</option>
+                    <option value="local">Ficheiro do PC</option>
                 </select>
-                <select id="select-origem">
-                    <option value="drive">Google Drive (Link)</option>
-                    <option value="local">Ficheiro Local (PC)</option>
-                </select>
-                <input type="text" id="input-link" placeholder="Cola o link do Drive aqui">
-                <input type="file" id="input-file" style="display: none;" accept="audio/*,video/*">
-                <button type="submit" class="btn-save">Salvar na Biblioteca</button>
-                <button type="button" onclick="fecharModal()" style="background:none; color:#888; border:none; margin-top:10px; cursor:pointer;">Cancelar</button>
+                <input type="text" id="add-link" placeholder="Cola o link do Drive aqui">
+                <input type="file" id="add-file" style="display:none;" accept="audio/*,video/*">
+                <button type="submit" class="btn-save">Salvar na Lista</button>
+                <button type="button" onclick="fecharModal()" style="background:none; border:none; color:#888; width:100%; margin-top:10px; cursor:pointer;">Cancelar</button>
             </form>
         </div>
     </div>
@@ -133,56 +123,56 @@
         let indexAtual = -1;
         const playerAudio = new Audio();
         const playerVideo = document.getElementById('main-video');
-        const videoContainer = document.getElementById('video-container');
+        const iframeDrive = document.getElementById('drive-player');
+        const container = document.getElementById('video-container');
 
-        // --- CONTROLO DO MODAL ---
-        const modal = document.getElementById('modal');
-        document.getElementById('btn-modal').onclick = () => modal.style.display = 'flex';
-        function fecharModal() { modal.style.display = 'none'; document.getElementById('add-form').reset(); }
+        // --- MODAL ---
+        const modal = document.getElementById('modal-add');
+        document.getElementById('btn-abrir-modal').onclick = () => modal.style.display = 'flex';
+        function fecharModal() { modal.style.display = 'none'; document.getElementById('form-add').reset(); }
 
-        // Alternar entre link e ficheiro
-        document.getElementById('select-origem').onchange = (e) => {
+        document.getElementById('add-origem').onchange = (e) => {
             const isLocal = e.target.value === 'local';
-            document.getElementById('input-link').style.display = isLocal ? 'none' : 'block';
-            document.getElementById('input-file').style.display = isLocal ? 'block' : 'none';
+            document.getElementById('add-link').style.display = isLocal ? 'none' : 'block';
+            document.getElementById('add-file').style.display = isLocal ? 'block' : 'none';
         };
 
-        // --- CONVERSOR DO GOOGLE DRIVE ---
-        function formatarLinkDrive(link) {
+        // --- LÓGICA DO DRIVE ---
+        function converterLinkDrive(link) {
             if (link.includes('drive.google.com')) {
                 const id = link.match(/\/d\/(.+?)\//);
-                return id ? `https://drive.google.com/uc?export=download&id=${id[1]}` : link;
+                return id ? `https://drive.google.com/file/d/${id[1]}/preview` : link;
             }
             return link;
         }
 
-        // --- ADICIONAR ITEM ---
-        document.getElementById('add-form').onsubmit = (e) => {
+        // --- ADICIONAR ---
+        document.getElementById('form-add').onsubmit = (e) => {
             e.preventDefault();
-            const titulo = document.getElementById('input-titulo').value;
-            const tipo = document.getElementById('select-tipo').value;
-            const origem = document.getElementById('select-origem').value;
+            const titulo = document.getElementById('add-titulo').value;
+            const origem = document.getElementById('add-origem').value;
             let url = "";
 
             if (origem === 'local') {
-                const file = document.getElementById('input-file').files[0];
+                const file = document.getElementById('add-file').files[0];
+                if (!file) return;
                 url = URL.createObjectURL(file);
             } else {
-                url = formatarLinkDrive(document.getElementById('input-link').value);
+                url = converterLinkDrive(document.getElementById('add-link').value);
             }
 
-            playlist.push({ titulo, tipo, url });
+            playlist.push({ titulo, url, origem });
             renderizar();
             fecharModal();
         };
 
         function renderizar() {
-            const lista = document.getElementById('playlist-lista');
+            const lista = document.getElementById('lista-playlist');
             lista.innerHTML = "";
             playlist.forEach((item, i) => {
                 const li = document.createElement('li');
                 li.className = `playlist-item ${i === indexAtual ? 'active' : ''}`;
-                li.innerHTML = `<span><i class="fas fa-${item.tipo === 'video' ? 'video' : 'music'}"></i> ${item.titulo}</span>`;
+                li.innerHTML = `<i class="fas fa-${item.origem === 'drive' ? 'cloud' : 'file-audio'}"></i> <span>${item.titulo}</span>`;
                 li.onclick = () => tocar(i);
                 lista.appendChild(li);
             });
@@ -193,52 +183,63 @@
             if (i < 0 || i >= playlist.length) return;
             indexAtual = i;
             const item = playlist[i];
-            
-            // Resetar ambos
+
+            // Parar tudo
             playerAudio.pause();
             playerVideo.pause();
-            videoContainer.style.display = item.tipo === 'video' ? 'block' : 'none';
+            playerVideo.style.display = 'none';
+            iframeDrive.style.display = 'none';
+            iframeDrive.src = "";
+            container.style.display = 'none';
 
-            if (item.tipo === 'video') {
-                playerVideo.src = item.url;
-                playerVideo.play();
-            } else {
-                playerAudio.src = item.url;
-                playerAudio.play();
+            if (item.url.includes('preview')) { // GOOGLE DRIVE
+                container.style.display = 'block';
+                iframeDrive.src = item.url;
+                iframeDrive.style.display = 'block';
+            } else { // LOCAL
+                const isVideo = item.url.startsWith('blob:') && document.getElementById('add-file').files[0]?.type.includes('video');
+                if (isVideo) {
+                    container.style.display = 'block';
+                    playerVideo.src = item.url;
+                    playerVideo.style.display = 'block';
+                    playerVideo.play();
+                } else {
+                    playerAudio.src = item.url;
+                    playerAudio.play();
+                }
             }
 
             document.getElementById('track-title').innerText = item.titulo;
-            document.getElementById('track-info').innerText = item.tipo.toUpperCase();
+            document.getElementById('track-type').innerText = item.origem.toUpperCase();
             document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
             renderizar();
         }
 
-        // Play/Pause Universal
+        // CONTROLOS
         document.getElementById('play-pause').onclick = () => {
-            const p = playlist[indexAtual]?.tipo === 'video' ? playerVideo : playerAudio;
-            if (p.paused) {
-                p.play();
+            if (indexAtual === -1) return;
+            if (playerAudio.paused && playerVideo.paused) {
+                playlist[indexAtual].url.includes('preview') ? null : (playerAudio.src ? playerAudio.play() : playerVideo.play());
                 document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
             } else {
-                p.pause();
+                playerAudio.pause(); playerVideo.pause();
                 document.getElementById('play-pause').innerHTML = '<i class="fas fa-play"></i>';
             }
         };
 
-        // Próxima e Anterior
-        document.getElementById('next').onclick = () => tocar(indexAtual + 1);
-        document.getElementById('prev').onclick = () => tocar(indexAtual - 1);
+        document.getElementById('btn-next').onclick = () => tocar(indexAtual + 1);
+        document.getElementById('btn-prev').onclick = () => tocar(indexAtual - 1);
 
-        // Busca
-        document.getElementById('busca').oninput = (e) => {
+        // BUSCA
+        document.getElementById('input-busca').oninput = (e) => {
             const termo = e.target.value.toLowerCase();
             document.querySelectorAll('.playlist-item').forEach(li => {
                 li.style.display = li.innerText.toLowerCase().includes(termo) ? 'flex' : 'none';
             });
         };
 
-        // Biblioteca Scroll
-        document.getElementById('link-biblioteca').onclick = () => {
+        // BIBLIOTECA
+        document.getElementById('btn-biblioteca').onclick = () => {
             document.getElementById('secao-biblioteca').scrollIntoView({ behavior: 'smooth' });
         };
     </script>
