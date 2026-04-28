@@ -1,302 +1,245 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jesus Reina - Player Local</title>
+    <title>Jesus Reina - Player Local & Drive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- CSS: Estilos e Cores (Mantidos) --- */
         :root {
-            --bg-body: #111111;
-            --bg-card: #1a1a1a;
-            --bg-modal: #222222;
+            --bg-body: #0a0a0a;
+            --bg-card: #151515;
+            --bg-modal: #1e1e1e;
             --text-main: #ffffff;
-            --text-muted: #aaaaaa;
-            --purple-main: #7e3ef8;
-            --purple-hover: #9c68f7;
-            --border-radius-main: 12px;
-            --border-radius-btn: 5px;
+            --text-muted: #888888;
+            --purple-main: #8a2be2;
+            --purple-hover: #9932cc;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .app-container { display: flex; flex: 1; overflow: hidden; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         /* SIDEBAR */
-        .sidebar {
-            width: 250px;
-            background-color: var(--bg-body);
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #333;
-        }
+        .sidebar { width: 260px; background-color: #000; padding: 25px; border-right: 1px solid #222; display: flex; flex-direction: column; }
+        .logo { font-size: 1.6rem; font-weight: 800; color: var(--purple-main); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+        .main-nav ul { list-style: none; }
+        .main-nav li { margin-bottom: 18px; }
+        .main-nav a, .add-btn { text-decoration: none; color: var(--text-muted); display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; background: none; border: none; width: 100%; font-size: 1rem; }
+        .main-nav a:hover, .add-btn:hover { color: #fff; }
 
-        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; margin-bottom: 40px; }
-        .logo i { color: var(--purple-main); }
+        /* CONTENT AREA */
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+        .search-bar { background: #1a1a1a; border-radius: 25px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; width: 400px; }
+        .search-bar input { background: none; border: none; color: #fff; width: 100%; outline: none; }
 
-        .main-nav ul { list-style: none; display: flex; flex-direction: column; gap: 15px; }
-        .main-nav a { text-decoration: none; color: var(--text-muted); display: flex; align-items: center; gap: 15px; transition: 0.2s; }
-        .main-nav a:hover { color: var(--text-main); }
+        /* VIDEO VIEWPORT */
+        #video-container { width: 100%; max-width: 800px; background: #000; border-radius: 12px; aspect-ratio: 16/9; display: none; margin: 0 auto; overflow: hidden; border: 2px solid #222; }
+        video { width: 100%; height: 100%; }
 
-        .add-btn-sidebar {
-            background: none; border: none; color: var(--text-muted); font-size: 1rem; 
-            text-align: left; cursor: pointer; width: 100%; display: flex; align-items: center; gap: 15px;
-        }
-
-        /* CONTEÚDO */
-        .content { flex: 1; padding: 30px; overflow-y: auto; scroll-behavior: smooth; }
-
-        .search-bar {
-            display: flex; align-items: center; background-color: #1a1a1a;
-            border-radius: 20px; padding: 5px 15px; width: 300px; margin-bottom: 30px;
-        }
-        .search-bar input { background: none; border: none; color: white; padding-left: 10px; width: 100%; outline: none; }
-
-        .lista-musicas { background-color: var(--bg-card); border-radius: var(--border-radius-main); padding: 20px; min-height: 150px; }
-        .lista-musicas ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-        .lista-musicas li {
-            padding: 10px 15px; background-color: #222; border-radius: 5px; cursor: pointer;
-            display: flex; align-items: center; gap: 15px;
-        }
-        .lista-musicas li:hover { background-color: #333; }
-        .lista-musicas li.tocando { border-left: 4px solid var(--purple-main); background-color: #282828; }
+        .playlist-container { background: var(--bg-card); border-radius: 12px; padding: 20px; }
+        .playlist-list { list-style: none; margin-top: 15px; }
+        .playlist-item { padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; margin-bottom: 5px; }
+        .playlist-item:hover { background: #222; }
+        .playlist-item.active { background: #2a2a2a; border-left: 4px solid var(--purple-main); }
 
         /* FOOTER PLAYER */
-        .footer-player {
-            position: fixed; bottom: 0; width: 100%; height: 90px;
-            background-color: rgba(17, 17, 17, 0.95); display: flex;
-            justify-content: space-between; align-items: center; padding: 0 20px; border-top: 1px solid #333;
-        }
-
-        .player-controls { flex: 1; max-width: 600px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .central-controls { display: flex; align-items: center; gap: 25px; }
-        .central-controls button { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
-        .central-controls button:hover { color: white; }
-        
-        #btn-play-pause {
-            background-color: var(--purple-main); color: white; width: 45px; height: 45px;
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-        }
-
-        #progresso { width: 100%; height: 5px; cursor: pointer; accent-color: var(--purple-main); }
+        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: #111; border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; }
+        .controls { display: flex; align-items: center; gap: 20px; }
+        .controls button { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; }
+        #play-pause { background: #fff; color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .progress-container { flex: 1; margin: 0 40px; display: flex; align-items: center; gap: 10px; }
+        #progress-bar { flex: 1; accent-color: var(--purple-main); cursor: pointer; }
 
         /* MODAL */
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100;
-        }
-        .modal-content { background: var(--bg-modal); padding: 30px; border-radius: 12px; width: 450px; }
-        .modal-content input, .modal-content select {
-            width: 100%; padding: 10px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 5px;
-        }
-        .save-btn { background: var(--purple-main); color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; width: 100%; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: var(--bg-modal); padding: 30px; border-radius: 15px; width: 450px; }
+        .modal-content input, .modal-content select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; }
+        .btn-save { background: var(--purple-main); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="logo"><i class="fas fa-cross"></i> <span>Jesus Reina</span></div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="#"><i class="fas fa-home"></i> Início</a></li>
-                    <li><a href="#" id="menu-biblioteca"><i class="fas fa-book-open"></i> Sua Biblioteca</a></li>
-                    <li><button class="add-btn-sidebar" id="btn-abrir-modal"><i class="fas fa-plus"></i> Adicionar Música/Vídeo</button></li>
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-cross"></i> Jesus Reina</div>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#" onclick="location.reload()"><i class="fas fa-home"></i> Início</a></li>
+                <li><a href="#" id="link-biblioteca"><i class="fas fa-book"></i> Biblioteca</a></li>
+                <li><button class="add-btn" id="btn-modal"><i class="fas fa-plus-circle"></i> Adicionar</button></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="busca" placeholder="O que deseja ouvir ou ver?">
+        </div>
+
+        <div id="video-container">
+            <video id="main-video" controls></video>
+        </div>
+
+        <div class="playlist-container" id="secao-biblioteca">
+            <h2>Ficheiros Adicionados</h2>
+            <ul class="playlist-list" id="playlist-lista">
                 </ul>
-            </nav>
-        </aside>
-
-        <main class="content">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" id="input-busca" placeholder="Buscar na sua biblioteca...">
-            </div>
-
-            <section class="biblioteca-local" id="secao-biblioteca">
-                <h2>Sua Coleção</h2>
-                <div class="lista-musicas">
-                    <ul id="playlist"></ul>
-                </div>
-            </section>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <footer class="footer-player">
-        <div class="track-info">
-            <div id="player-titulo" style="font-weight:bold">Nada tocando</div>
-            <div id="player-artista" style="color:gray; font-size:0.8rem">Selecione um arquivo</div>
-        </div>
-        
-        <div class="player-controls">
-            <div class="central-controls">
-                <button id="btn-anterior"><i class="fas fa-backward"></i></button>
-                <button id="btn-play-pause"><i class="fas fa-play"></i></button>
-                <button id="btn-proxima"><i class="fas fa-forward"></i></button>
-            </div>
-            <input type="range" id="progresso" value="0">
+        <div style="width: 200px;">
+            <div id="track-title" style="font-weight: bold;">Título</div>
+            <div id="track-info" style="font-size: 0.8rem; color: #888;">Informação</div>
         </div>
 
-        <div class="volume">
-            <i class="fas fa-volume-up"></i>
+        <div class="progress-container">
+            <span id="time-current">0:00</span>
+            <input type="range" id="progress-bar" value="0">
+            <span id="time-total">0:00</span>
+        </div>
+
+        <div class="controls">
+            <button id="prev"><i class="fas fa-step-backward"></i></button>
+            <button id="play-pause"><i class="fas fa-play"></i></button>
+            <button id="next"><i class="fas fa-step-forward"></i></button>
         </div>
     </footer>
 
-    <div id="modal-adicionar" class="modal">
+    <div class="modal" id="modal">
         <div class="modal-content">
-            <h3>Adicionar à Biblioteca</h3>
-            <form id="form-musica">
-                <input type="text" id="titulo" placeholder="Título" required>
-                
-                <label style="font-size: 0.8rem; color: gray;">Origem do arquivo:</label>
-                <select id="origem-arquivo">
-                    <option value="local">Arquivo Local (PC)</option>
-                    <option value="drive">Google Drive (Link do Vídeo)</option>
+            <h3>Novo Item</h3>
+            <form id="add-form">
+                <input type="text" id="input-titulo" placeholder="Nome da música ou vídeo" required>
+                <select id="select-tipo">
+                    <option value="audio">Música (Áudio)</option>
+                    <option value="video">Vídeo</option>
                 </select>
-
-                <div id="campo-local">
-                    <input type="file" id="arquivo-pc" accept="audio/*, video/*">
-                </div>
-                
-                <div id="campo-drive" style="display:none">
-                    <input type="text" id="link-drive" placeholder="Cole o link do vídeo do Google Drive aqui">
-                </div>
-
-                <button type="submit" class="save-btn">Salvar na Lista</button>
-                <button type="button" onclick="fecharModal()" style="background:none; border:none; color:gray; width:100%; margin-top:10px; cursor:pointer">Cancelar</button>
+                <select id="select-origem">
+                    <option value="drive">Google Drive (Link)</option>
+                    <option value="local">Ficheiro Local (PC)</option>
+                </select>
+                <input type="text" id="input-link" placeholder="Cola o link do Drive aqui">
+                <input type="file" id="input-file" style="display: none;" accept="audio/*,video/*">
+                <button type="submit" class="btn-save">Salvar na Biblioteca</button>
+                <button type="button" onclick="fecharModal()" style="background:none; color:#888; border:none; margin-top:10px; cursor:pointer;">Cancelar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // --- VARIÁVEIS DE CONTROLE ---
-        let filaDeMusicas = []; // Nossa "Fila" organizada
-        let indiceAtual = -1;
-        const audioPlayer = new Audio();
+        let playlist = [];
+        let indexAtual = -1;
+        const playerAudio = new Audio();
+        const playerVideo = document.getElementById('main-video');
+        const videoContainer = document.getElementById('video-container');
 
-        // --- ELEMENTOS ---
-        const modal = document.getElementById('modal-adicionar');
-        const playlistUI = document.getElementById('playlist');
-        const btnPlay = document.getElementById('btn-play-pause');
-        const iconePlay = btnPlay.querySelector('i');
+        // --- CONTROLO DO MODAL ---
+        const modal = document.getElementById('modal');
+        document.getElementById('btn-modal').onclick = () => modal.style.display = 'flex';
+        function fecharModal() { modal.style.display = 'none'; document.getElementById('add-form').reset(); }
 
-        // --- FUNÇÕES DE NAVEGAÇÃO ---
-        function abrirModal() { modal.style.display = 'flex'; }
-        function fecharModal() { modal.style.display = 'none'; document.getElementById('form-musica').reset(); }
+        // Alternar entre link e ficheiro
+        document.getElementById('select-origem').onchange = (e) => {
+            const isLocal = e.target.value === 'local';
+            document.getElementById('input-link').style.display = isLocal ? 'none' : 'block';
+            document.getElementById('input-file').style.display = isLocal ? 'block' : 'none';
+        };
 
-        // Alternar campos Local vs Drive
-        document.getElementById('origem-arquivo').addEventListener('change', (e) => {
-            document.getElementById('campo-local').style.display = e.target.value === 'local' ? 'block' : 'none';
-            document.getElementById('campo-drive').style.display = e.target.value === 'drive' ? 'block' : 'none';
-        });
+        // --- CONVERSOR DO GOOGLE DRIVE ---
+        function formatarLinkDrive(link) {
+            if (link.includes('drive.google.com')) {
+                const id = link.match(/\/d\/(.+?)\//);
+                return id ? `https://drive.google.com/uc?export=download&id=${id[1]}` : link;
+            }
+            return link;
+        }
 
-        document.getElementById('btn-abrir-modal').onclick = abrirModal;
-
-        // --- ADICIONAR À FILA ---
-        document.getElementById('form-musica').onsubmit = (e) => {
+        // --- ADICIONAR ITEM ---
+        document.getElementById('add-form').onsubmit = (e) => {
             e.preventDefault();
-            const titulo = document.getElementById('titulo').value;
-            const origem = document.getElementById('origem-arquivo').value;
+            const titulo = document.getElementById('input-titulo').value;
+            const tipo = document.getElementById('select-tipo').value;
+            const origem = document.getElementById('select-origem').value;
             let url = "";
 
             if (origem === 'local') {
-                const arquivo = document.getElementById('arquivo-pc').files[0];
-                if (!arquivo) return;
-                url = URL.createObjectURL(arquivo);
+                const file = document.getElementById('input-file').files[0];
+                url = URL.createObjectURL(file);
             } else {
-                url = document.getElementById('link-drive').value;
+                url = formatarLinkDrive(document.getElementById('input-link').value);
             }
 
-            const novaMusica = { titulo, url };
-            filaDeMusicas.push(novaMusica);
-            renderizarPlaylist();
+            playlist.push({ titulo, tipo, url });
+            renderizar();
             fecharModal();
         };
 
-        // --- RENDERIZAR LISTA VISUAL ---
-        function renderizarPlaylist() {
-            playlistUI.innerHTML = "";
-            filaDeMusicas.forEach((musica, index) => {
+        function renderizar() {
+            const lista = document.getElementById('playlist-lista');
+            lista.innerHTML = "";
+            playlist.forEach((item, i) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<i class="fas fa-play"></i> <span>${musica.titulo}</span>`;
-                if (index === indiceAtual) li.classList.add('tocando');
-                li.onclick = () => tocarMusica(index);
-                playlistUI.appendChild(li);
+                li.className = `playlist-item ${i === indexAtual ? 'active' : ''}`;
+                li.innerHTML = `<span><i class="fas fa-${item.tipo === 'video' ? 'video' : 'music'}"></i> ${item.titulo}</span>`;
+                li.onclick = () => tocar(i);
+                lista.appendChild(li);
             });
         }
 
-        // --- MOTOR DO PLAYER ---
-        function tocarMusica(index) {
-            if (index < 0 || index >= filaDeMusicas.length) return;
+        // --- PLAYER ---
+        function tocar(i) {
+            if (i < 0 || i >= playlist.length) return;
+            indexAtual = i;
+            const item = playlist[i];
             
-            indiceAtual = index;
-            const musica = filaDeMusicas[indiceAtual];
-            
-            audioPlayer.src = musica.url;
-            audioPlayer.play();
-            
-            document.getElementById('player-titulo').textContent = musica.titulo;
-            document.getElementById('player-artista').textContent = "Reproduzindo agora";
-            iconePlay.classList.replace('fa-play', 'fa-pause');
-            renderizarPlaylist();
-        }
+            // Resetar ambos
+            playerAudio.pause();
+            playerVideo.pause();
+            videoContainer.style.display = item.tipo === 'video' ? 'block' : 'none';
 
-        btnPlay.onclick = () => {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-                iconePlay.classList.replace('fa-play', 'fa-pause');
+            if (item.tipo === 'video') {
+                playerVideo.src = item.url;
+                playerVideo.play();
             } else {
-                audioPlayer.pause();
-                iconePlay.classList.replace('fa-pause', 'fa-play');
+                playerAudio.src = item.url;
+                playerAudio.play();
+            }
+
+            document.getElementById('track-title').innerText = item.titulo;
+            document.getElementById('track-info').innerText = item.tipo.toUpperCase();
+            document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            renderizar();
+        }
+
+        // Play/Pause Universal
+        document.getElementById('play-pause').onclick = () => {
+            const p = playlist[indexAtual]?.tipo === 'video' ? playerVideo : playerAudio;
+            if (p.paused) {
+                p.play();
+                document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                p.pause();
+                document.getElementById('play-pause').innerHTML = '<i class="fas fa-play"></i>';
             }
         };
 
-        // FUNÇÃO DOS BOTÕES ANTERIOR E PRÓXIMA
-        document.getElementById('btn-proxima').onclick = () => {
-            if (indiceAtual < filaDeMusicas.length - 1) {
-                tocarMusica(indiceAtual + 1);
-            }
-        };
+        // Próxima e Anterior
+        document.getElementById('next').onclick = () => tocar(indexAtual + 1);
+        document.getElementById('prev').onclick = () => tocar(indexAtual - 1);
 
-        document.getElementById('btn-anterior').onclick = () => {
-            if (indiceAtual > 0) {
-                tocarMusica(indiceAtual - 1);
-            }
-        };
-
-        // --- BUSCA E BIBLIOTECA ---
-        document.getElementById('input-busca').oninput = (e) => {
+        // Busca
+        document.getElementById('busca').oninput = (e) => {
             const termo = e.target.value.toLowerCase();
-            const itens = playlistUI.querySelectorAll('li');
-            itens.forEach(item => {
-                const texto = item.textContent.toLowerCase();
-                item.style.display = texto.includes(termo) ? "flex" : "none";
+            document.querySelectorAll('.playlist-item').forEach(li => {
+                li.style.display = li.innerText.toLowerCase().includes(termo) ? 'flex' : 'none';
             });
         };
 
-        document.getElementById('menu-biblioteca').onclick = (e) => {
-            e.preventDefault();
+        // Biblioteca Scroll
+        document.getElementById('link-biblioteca').onclick = () => {
             document.getElementById('secao-biblioteca').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // Atualizar barra de progresso
-        audioPlayer.ontimeupdate = () => {
-            const prog = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-            document.getElementById('progresso').value = prog || 0;
-        };
-
-        document.getElementById('progresso').oninput = (e) => {
-            audioPlayer.currentTime = (e.target.value / 100) * audioPlayer.duration;
         };
     </script>
 </body>
