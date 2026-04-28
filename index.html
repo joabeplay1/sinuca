@@ -33,7 +33,7 @@
             width: 100vw;
             height: 100vh;
             z-index: 0; 
-            pointer-events: none; 
+            
         }
 
         /* --- MENU LATERAL --- */
@@ -48,7 +48,7 @@
 
         /* --- CONTEÚDO CENTRAL --- */
         .main-content { flex: 1; padding: 40px; z-index: 10; display: flex; flex-direction: column; gap: 30px; pointer-events: none; /* Deixa o clique passar para o modal */ }
-        .main-content > * { pointer-events: auto; } /* Reativa clique nos elementos */
+         /* Reativa clique nos elementos */
 
         .search-bar { background: transparent; border: 1px solid var(--neon-pink); border-radius: 25px; padding: 12px 20px; display: flex; align-items: center; gap: 10px; width: 350px; box-shadow: 0 0 15px rgba(255,0,127,0.3); }
         .search-bar i { color: var(--neon-pink); text-shadow: 0 0 5px var(--neon-pink); }
@@ -205,7 +205,7 @@
                 this.y = Math.random() * canvas.height;
                 this.vx = (Math.random() - 0.5) * 2;
                 this.vy = (Math.random() - 0.5) * 2;
-                this.size = Math.random() * 3 + 1;
+                this.size = Math.random() * 8 + 4;
                 this.color = Math.random() > 0.5 ? '#ff007f' : '#00f0ff';
                 this.isNote = Math.random() > 0.8;
                 this.noteChar = Math.random() > 0.5 ? '♪' : '♫';
