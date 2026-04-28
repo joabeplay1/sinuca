@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jesus Reina - Player Oficial</title>
+    <title>Jesus Reina - Player Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -13,46 +13,98 @@
             --text-main: #ffffff;
             --text-muted: #888888;
             --purple-main: #8a2be2;
+            --purple-glow: rgba(138, 43, 226, 0.6);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
+        /* --- ANIMAÇÕES (@keyframes) --- */
+        @keyframes fadeInSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(138, 43, 226, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 15px 5px rgba(138, 43, 226, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(138, 43, 226, 0); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* MENU LATERAL */
-        .sidebar { width: 260px; background-color: #000; padding: 25px; border-right: 1px solid #222; display: flex; flex-direction: column; }
+        .sidebar { width: 260px; background-color: #000; padding: 25px; border-right: 1px solid #222; display: flex; flex-direction: column; z-index: 20; }
         .logo { font-size: 1.6rem; font-weight: 800; color: var(--purple-main); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
         .main-nav ul { list-style: none; }
         .main-nav li { margin-bottom: 18px; }
-        .main-nav a, .add-btn { text-decoration: none; color: var(--text-muted); display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; background: none; border: none; width: 100%; font-size: 1rem; }
-        .main-nav a:hover, .add-btn:hover { color: #fff; }
+        
+        /* Micro-interações nos Links */
+        .main-nav a, .add-btn { 
+            text-decoration: none; color: var(--text-muted); display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; background: none; border: none; width: 100%; font-size: 1rem;
+            transition: all 0.3s ease; /* Transição suave */
+        }
+        .main-nav a:hover, .add-btn:hover { color: #fff; transform: translateX(8px); /* Desliza um pouco para a direita */ }
 
         /* CONTEÚDO CENTRAL */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 120px; }
-        .search-bar { background: #1a1a1a; border-radius: 25px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; width: 400px; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 120px; scroll-behavior: smooth; }
+        
+        .search-bar { background: #1a1a1a; border-radius: 25px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; width: 400px; transition: box-shadow 0.3s ease; }
+        .search-bar:focus-within { box-shadow: 0 0 10px var(--purple-glow); border: 1px solid var(--purple-main); }
         .search-bar input { background: none; border: none; color: #fff; width: 100%; outline: none; }
 
-        /* TELA DE VÍDEO */
-        #video-container { width: 100%; max-width: 800px; background: #000; border-radius: 12px; aspect-ratio: 16/9; display: none; margin: 0 auto; overflow: hidden; border: 2px solid #222; }
+        /* TELA DE VÍDEO (Com fundo preparado para tela cheia) */
+        #video-container { width: 100%; max-width: 800px; background: #000; border-radius: 12px; aspect-ratio: 16/9; display: none; margin: 0 auto; overflow: hidden; border: 2px solid #222; transition: all 0.4s ease; }
         video, iframe { width: 100%; height: 100%; border: none; }
 
         /* LISTA DE MÚSICAS */
         .playlist-container { background: var(--bg-card); border-radius: 12px; padding: 20px; }
         .playlist-list { list-style: none; margin-top: 15px; }
-        .playlist-item { padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
-        .playlist-item:hover { background: #222; }
-        .playlist-item.active { background: #2a2a2a; border-left: 4px solid var(--purple-main); }
+        .playlist-item { 
+            padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px; 
+            transition: all 0.2s ease; 
+            opacity: 0; /* Começa invisível para a animação */
+            animation: fadeInSlideUp 0.4s ease-out forwards;
+        }
+        .playlist-item:hover { background: #222; transform: scale(1.01); }
+        .playlist-item.active { background: #2a2a2a; border-left: 4px solid var(--purple-main); box-shadow: inset 0 0 15px rgba(138,43,226,0.1); }
 
         /* BARRA DO PLAYER (RODAPÉ) */
-        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: #111; border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 10; }
+        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: rgba(17,17,17,0.95); backdrop-filter: blur(10px); border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 100; }
+        
+        .now-playing { display: flex; align-items: center; gap: 15px; width: 250px; }
+        .cover-art { width: 50px; height: 50px; background: #222; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--purple-main); transition: all 0.3s ease; }
+        
+        /* Classe que o JS vai ligar/desligar para pulsar */
+        .is-playing .cover-art { animation: pulse 2s infinite, spin 10s linear infinite; background: var(--purple-main); color: white; }
+
         .controls { display: flex; align-items: center; gap: 20px; }
-        .controls button { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; }
-        #play-pause { background: #fff; color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        
+        /* Micro-interações dos botões de controle */
+        .controls button, .extra-controls button { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; transition: all 0.2s ease; }
+        .controls button:hover, .extra-controls button:hover { color: #fff; transform: scale(1.2); }
+        .controls button:active, .extra-controls button:active { transform: scale(0.9); }
+        
+        #play-pause { background: #fff; color: #000; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        #play-pause:hover { background: var(--purple-main); color: #fff; box-shadow: 0 0 15px var(--purple-glow); }
+
+        .extra-controls { width: 250px; display: flex; justify-content: flex-end; align-items: center; gap: 20px; }
 
         /* JANELA FLUTUANTE (MODAL) */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
-        .modal-content { background: var(--bg-modal); padding: 30px; border-radius: 15px; width: 450px; }
-        .modal-content input, .modal-content select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; }
-        .btn-save { background: var(--purple-main); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s ease; }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content { background: var(--bg-modal); padding: 30px; border-radius: 15px; width: 450px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); transform: translateY(30px); transition: transform 0.3s ease; }
+        .modal.show .modal-content { transform: translateY(0); } /* Desliza pra cima ao abrir */
+        
+        .modal-content input, .modal-content select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; transition: border 0.3s ease; }
+        .modal-content input:focus, .modal-content select:focus { border-color: var(--purple-main); outline: none; }
+        
+        .btn-save { background: var(--purple-main); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s ease; }
+        .btn-save:hover { background: var(--purple-hover); transform: translateY(-2px); box-shadow: 0 5px 15px var(--purple-glow); }
+        .btn-save:active { transform: translateY(0); }
     </style>
 </head>
 <body>
@@ -76,7 +128,7 @@
 
         <div id="video-container">
             <video id="main-video" controls style="display:none;"></video>
-            <iframe id="drive-player" style="display:none;"></iframe>
+            <iframe id="drive-player" style="display:none;" allowfullscreen></iframe>
         </div>
 
         <div class="playlist-container" id="secao-biblioteca">
@@ -85,10 +137,13 @@
         </div>
     </main>
 
-    <footer class="footer-player">
-        <div style="width: 250px;">
-            <div id="track-title" style="font-weight: bold;">Nada tocando</div>
-            <div id="track-type" style="font-size: 0.8rem; color: #888;">Escolha um arquivo</div>
+    <footer class="footer-player" id="player-rodape">
+        <div class="now-playing">
+            <div class="cover-art"><i class="fas fa-music"></i></div>
+            <div>
+                <div id="track-title" style="font-weight: bold;">Nada tocando</div>
+                <div id="track-type" style="font-size: 0.8rem; color: #888;">Escolha um arquivo</div>
+            </div>
         </div>
 
         <div class="controls">
@@ -97,8 +152,9 @@
             <button id="btn-next"><i class="fas fa-step-forward"></i></button>
         </div>
 
-        <div style="width: 250px; text-align: right; color: var(--purple-main);">
-            <i class="fas fa-volume-up"></i>
+        <div class="extra-controls">
+            <button><i class="fas fa-volume-up"></i></button>
+            <button id="btn-fullscreen" title="Tela Cheia"><i class="fas fa-expand"></i></button>
         </div>
     </footer>
 
@@ -123,15 +179,14 @@
         let playlist = [];
         let indexAtual = -1;
         
-        // Elementos do Player
         const playerAudio = new Audio();
         const playerVideo = document.getElementById('main-video');
         const iframeDrive = document.getElementById('drive-player');
-        const container = document.getElementById('video-container');
+        const containerVideo = document.getElementById('video-container');
+        const rodapeAnimacao = document.getElementById('player-rodape');
 
-        // --- 1. MEMÓRIA DO NAVEGADOR (Salvar eternamente) ---
+        // --- 1. MEMÓRIA ---
         function salvarNaMemoria() {
-            // Filtra e salva apenas links da internet (Drive), pois arquivos de PC somem ao fechar a aba
             const itensParaSalvar = playlist.filter(item => item.origem === 'drive');
             localStorage.setItem('jesusReinaAcervo', JSON.stringify(itensParaSalvar));
         }
@@ -139,29 +194,28 @@
         function carregarDaMemoria() {
             const dadosSalvos = localStorage.getItem('jesusReinaAcervo');
             if (dadosSalvos) {
-                playlist = JSON.parse(dadosSalvos); // Transforma o texto de volta em lista
+                playlist = JSON.parse(dadosSalvos);
                 renderizar();
             }
         }
+        carregarDaMemoria();
 
-        // Chama a memória assim que a página abre
-        carregarDaMemoria(); 
-
-        // --- 2. ÁREA DO ADMINISTRADOR (Senha) ---
+        // --- 2. MODAL COM ANIMAÇÃO ---
         const modal = document.getElementById('modal-add');
-        
         document.getElementById('btn-abrir-modal').onclick = () => {
             const senha = prompt("Área restrita");
             if (senha === "777") {
-                modal.style.display = 'flex';
-            } else if (senha !== null) { // Se não clicou em cancelar
+                modal.classList.add('show'); // Usa a classe CSS para animar a entrada
+            } else if (senha !== null) {
                 alert("Senha incorreta!");
             }
         };
         
-        function fecharModal() { modal.style.display = 'none'; document.getElementById('form-add').reset(); }
+        function fecharModal() { 
+            modal.classList.remove('show'); 
+            setTimeout(() => { document.getElementById('form-add').reset(); }, 300); // Espera a animação acabar
+        }
 
-        // Alterna os campos dependendo se é PC ou Drive
         document.getElementById('add-origem').onchange = (e) => {
             const isLocal = e.target.value === 'local';
             document.getElementById('add-link').style.display = isLocal ? 'none' : 'block';
@@ -192,7 +246,7 @@
             }
 
             playlist.push({ titulo, url, origem });
-            salvarNaMemoria(); // Atualiza a memória permanente
+            salvarNaMemoria();
             renderizar();
             fecharModal();
         };
@@ -203,6 +257,9 @@
             playlist.forEach((item, i) => {
                 const li = document.createElement('li');
                 li.className = `playlist-item ${i === indexAtual ? 'active' : ''}`;
+                // Efeito em cascata: cada música demora um pouquinho mais para aparecer
+                li.style.animationDelay = `${i * 0.05}s`; 
+                
                 li.innerHTML = `<i class="fas fa-${item.origem === 'drive' ? 'cloud' : 'file-audio'}"></i> <span>${item.titulo}</span>`;
                 li.onclick = () => tocar(i);
                 lista.appendChild(li);
@@ -210,6 +267,14 @@
         }
 
         // --- 4. MOTOR DO PLAYER ---
+        function atualizarAnimacao(tocando) {
+            if(tocando) {
+                rodapeAnimacao.classList.add('is-playing');
+            } else {
+                rodapeAnimacao.classList.remove('is-playing');
+            }
+        }
+
         function tocar(i) {
             if (i < 0 || i >= playlist.length) return;
             indexAtual = i;
@@ -220,40 +285,52 @@
             playerVideo.style.display = 'none';
             iframeDrive.style.display = 'none';
             iframeDrive.src = "";
-            container.style.display = 'none';
+            containerVideo.style.display = 'none';
+
+            let vaiTocar = false;
 
             if (item.origem === 'drive') { 
-                container.style.display = 'block';
+                containerVideo.style.display = 'block';
                 iframeDrive.src = item.url;
                 iframeDrive.style.display = 'block';
+                vaiTocar = true; // O Drive toca no iframe
             } else { 
                 const isVideo = item.url.startsWith('blob:') && document.getElementById('add-file').files[0]?.type.includes('video');
                 if (isVideo) {
-                    container.style.display = 'block';
+                    containerVideo.style.display = 'block';
                     playerVideo.src = item.url;
                     playerVideo.style.display = 'block';
                     playerVideo.play();
+                    vaiTocar = true;
                 } else {
                     playerAudio.src = item.url;
                     playerAudio.play();
+                    vaiTocar = true;
                 }
             }
 
             document.getElementById('track-title').innerText = item.titulo;
             document.getElementById('track-type').innerText = item.origem.toUpperCase();
             document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+            
+            atualizarAnimacao(vaiTocar);
             renderizar();
         }
 
-        // --- 5. BOTÕES DE CONTROLE E BUSCA ---
+        // --- 5. CONTROLOS E TELA CHEIA ---
         document.getElementById('play-pause').onclick = () => {
             if (indexAtual === -1) return;
-            if (playerAudio.paused && playerVideo.paused) {
+            
+            let isPaused = playerAudio.paused && playerVideo.paused;
+            
+            if (isPaused) {
                 playlist[indexAtual].origem === 'drive' ? null : (playerAudio.src ? playerAudio.play() : playerVideo.play());
                 document.getElementById('play-pause').innerHTML = '<i class="fas fa-pause"></i>';
+                atualizarAnimacao(true);
             } else {
                 playerAudio.pause(); playerVideo.pause();
                 document.getElementById('play-pause').innerHTML = '<i class="fas fa-play"></i>';
+                atualizarAnimacao(false);
             }
         };
 
@@ -269,6 +346,26 @@
 
         document.getElementById('btn-biblioteca').onclick = () => {
             document.getElementById('secao-biblioteca').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // LÓGICA DE TELA CHEIA
+        const btnFullscreen = document.getElementById('btn-fullscreen');
+        btnFullscreen.onclick = () => {
+            // Se o vídeo não estiver aparecendo, não faz sentido dar tela cheia
+            if(containerVideo.style.display === 'none' || containerVideo.style.display === '') {
+                alert("Selecione um vídeo primeiro para usar a tela cheia.");
+                return;
+            }
+
+            if (!document.fullscreenElement) {
+                containerVideo.requestFullscreen().catch(err => {
+                    alert(`Erro ao tentar tela cheia: ${err.message}`);
+                });
+                btnFullscreen.innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                document.exitFullscreen();
+                btnFullscreen.innerHTML = '<i class="fas fa-expand"></i>';
+            }
         };
     </script>
 </body>
