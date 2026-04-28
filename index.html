@@ -17,7 +17,19 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; position: relative; }
+
+        /* --- CANVAS DAS PARTÍCULAS NEON --- */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; /* Fica no fundo */
+            pointer-events: none; /* Não atrapalha os cliques */
+            opacity: 0.8;
+        }
 
         /* --- ANIMAÇÕES (@keyframes) --- */
         @keyframes fadeInSlideUp {
@@ -42,48 +54,44 @@
         .main-nav ul { list-style: none; }
         .main-nav li { margin-bottom: 18px; }
         
-        /* Micro-interações nos Links */
         .main-nav a, .add-btn { 
             text-decoration: none; color: var(--text-muted); display: flex; align-items: center; gap: 12px; font-weight: 600; cursor: pointer; background: none; border: none; width: 100%; font-size: 1rem;
-            transition: all 0.3s ease; /* Transição suave */
+            transition: all 0.3s ease; 
         }
-        .main-nav a:hover, .add-btn:hover { color: #fff; transform: translateX(8px); /* Desliza um pouco para a direita */ }
+        .main-nav a:hover, .add-btn:hover { color: #fff; transform: translateX(8px); }
 
         /* CONTEÚDO CENTRAL */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 120px; scroll-behavior: smooth; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding-bottom: 120px; scroll-behavior: smooth; z-index: 10; }
         
         .search-bar { background: #1a1a1a; border-radius: 25px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; width: 400px; transition: box-shadow 0.3s ease; }
         .search-bar:focus-within { box-shadow: 0 0 10px var(--purple-glow); border: 1px solid var(--purple-main); }
         .search-bar input { background: none; border: none; color: #fff; width: 100%; outline: none; }
 
-        /* TELA DE VÍDEO (Com fundo preparado para tela cheia) */
-        #video-container { width: 100%; max-width: 800px; background: #000; border-radius: 12px; aspect-ratio: 16/9; display: none; margin: 0 auto; overflow: hidden; border: 2px solid #222; transition: all 0.4s ease; }
+        /* TELA DE VÍDEO */
+        #video-container { width: 100%; max-width: 800px; background: #000; border-radius: 12px; aspect-ratio: 16/9; display: none; margin: 0 auto; overflow: hidden; border: 2px solid #222; transition: all 0.4s ease; position: relative; z-index: 15;}
         video, iframe { width: 100%; height: 100%; border: none; }
 
         /* LISTA DE MÚSICAS */
-        .playlist-container { background: var(--bg-card); border-radius: 12px; padding: 20px; }
+        .playlist-container { background: rgba(21, 21, 21, 0.85); backdrop-filter: blur(5px); border-radius: 12px; padding: 20px; }
         .playlist-list { list-style: none; margin-top: 15px; }
         .playlist-item { 
             padding: 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 15px; 
             transition: all 0.2s ease; 
-            opacity: 0; /* Começa invisível para a animação */
+            opacity: 0; 
             animation: fadeInSlideUp 0.4s ease-out forwards;
         }
-        .playlist-item:hover { background: #222; transform: scale(1.01); }
-        .playlist-item.active { background: #2a2a2a; border-left: 4px solid var(--purple-main); box-shadow: inset 0 0 15px rgba(138,43,226,0.1); }
+        .playlist-item:hover { background: rgba(34, 34, 34, 0.9); transform: scale(1.01); }
+        .playlist-item.active { background: rgba(42, 42, 42, 0.9); border-left: 4px solid var(--purple-main); box-shadow: inset 0 0 15px rgba(138,43,226,0.1); }
 
         /* BARRA DO PLAYER (RODAPÉ) */
-        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: rgba(17,17,17,0.95); backdrop-filter: blur(10px); border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 100; }
+        .footer-player { position: fixed; bottom: 0; left: 0; right: 0; height: 90px; background: rgba(17,17,17,0.85); backdrop-filter: blur(15px); border-top: 1px solid #222; display: flex; align-items: center; padding: 0 30px; justify-content: space-between; z-index: 100; }
         
         .now-playing { display: flex; align-items: center; gap: 15px; width: 250px; }
         .cover-art { width: 50px; height: 50px; background: #222; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--purple-main); transition: all 0.3s ease; }
         
-        /* Classe que o JS vai ligar/desligar para pulsar */
         .is-playing .cover-art { animation: pulse 2s infinite, spin 10s linear infinite; background: var(--purple-main); color: white; }
 
         .controls { display: flex; align-items: center; gap: 20px; }
-        
-        /* Micro-interações dos botões de controle */
         .controls button, .extra-controls button { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; transition: all 0.2s ease; }
         .controls button:hover, .extra-controls button:hover { color: #fff; transform: scale(1.2); }
         .controls button:active, .extra-controls button:active { transform: scale(0.9); }
@@ -97,7 +105,7 @@
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 200; opacity: 0; transition: opacity 0.3s ease; }
         .modal.show { display: flex; opacity: 1; }
         .modal-content { background: var(--bg-modal); padding: 30px; border-radius: 15px; width: 450px; box-shadow: 0 15px 30px rgba(0,0,0,0.5); transform: translateY(30px); transition: transform 0.3s ease; }
-        .modal.show .modal-content { transform: translateY(0); } /* Desliza pra cima ao abrir */
+        .modal.show .modal-content { transform: translateY(0); }
         
         .modal-content input, .modal-content select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: #fff; transition: border 0.3s ease; }
         .modal-content input:focus, .modal-content select:focus { border-color: var(--purple-main); outline: none; }
@@ -108,6 +116,8 @@
     </style>
 </head>
 <body>
+
+    <canvas id="particle-canvas"></canvas>
 
     <aside class="sidebar">
         <div class="logo"><i class="fas fa-cross"></i> Jesus Reina</div>
@@ -176,6 +186,7 @@
     </div>
 
     <script>
+        // --- VARIÁVEIS DO PLAYER ---
         let playlist = [];
         let indexAtual = -1;
         
@@ -184,6 +195,83 @@
         const iframeDrive = document.getElementById('drive-player');
         const containerVideo = document.getElementById('video-container');
         const rodapeAnimacao = document.getElementById('player-rodape');
+
+        // --- SISTEMA DE PARTÍCULAS NEON (VISUALIZADOR) ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        let isMusicPlaying = false; // Variável que controla o "ritmo" das partículas
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                // Começam do meio da tela
+                this.x = canvas.width / 2;
+                this.y = (canvas.height / 2) - 50;
+                
+                // Direção circular aleatória
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 2 + 0.5;
+                this.baseVelocityX = Math.cos(angle) * speed;
+                this.baseVelocityY = Math.sin(angle) * speed;
+                this.size = Math.random() * 3 + 1;
+                
+                // Cores Neon (Rosa, Roxo, Azul Claro)
+                const colors = ['#ff007f', '#8a2be2', '#00f0ff'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.life = 1;
+            }
+            update() {
+                // A magia: Se a música toca, as partículas ficam mais rápidas
+                let speedMultiplier = isMusicPlaying ? 3.5 : 0.4;
+                
+                this.x += this.baseVelocityX * speedMultiplier;
+                this.y += this.baseVelocityY * speedMultiplier;
+
+                if (this.size > 0.1) this.size -= 0.01 * speedMultiplier;
+                this.life -= 0.005 * speedMultiplier;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            // Se a música tocar, solta mais partículas
+            let spawnRate = isMusicPlaying ? 4 : 1;
+            if (particlesArray.length < 200) {
+                for(let i = 0; i < spawnRate; i++) {
+                    particlesArray.push(new Particle());
+                }
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            initParticles();
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                // Remove partículas que sumiram
+                if (particlesArray[i].life <= 0 || particlesArray[i].size <= 0.1) {
+                    particlesArray.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles(); // Inicia a animação em background
 
         // --- 1. MEMÓRIA ---
         function salvarNaMemoria() {
@@ -200,12 +288,12 @@
         }
         carregarDaMemoria();
 
-        // --- 2. MODAL COM ANIMAÇÃO ---
+        // --- 2. MODAL ---
         const modal = document.getElementById('modal-add');
         document.getElementById('btn-abrir-modal').onclick = () => {
             const senha = prompt("Área restrita");
             if (senha === "777") {
-                modal.classList.add('show'); // Usa a classe CSS para animar a entrada
+                modal.classList.add('show');
             } else if (senha !== null) {
                 alert("Senha incorreta!");
             }
@@ -213,7 +301,7 @@
         
         function fecharModal() { 
             modal.classList.remove('show'); 
-            setTimeout(() => { document.getElementById('form-add').reset(); }, 300); // Espera a animação acabar
+            setTimeout(() => { document.getElementById('form-add').reset(); }, 300); 
         }
 
         document.getElementById('add-origem').onchange = (e) => {
@@ -230,7 +318,7 @@
             return link;
         }
 
-        // --- 3. SALVAR NOVA MÚSICA/VÍDEO ---
+        // --- 3. SALVAR ITEM ---
         document.getElementById('form-add').onsubmit = (e) => {
             e.preventDefault();
             const titulo = document.getElementById('add-titulo').value;
@@ -257,9 +345,7 @@
             playlist.forEach((item, i) => {
                 const li = document.createElement('li');
                 li.className = `playlist-item ${i === indexAtual ? 'active' : ''}`;
-                // Efeito em cascata: cada música demora um pouquinho mais para aparecer
                 li.style.animationDelay = `${i * 0.05}s`; 
-                
                 li.innerHTML = `<i class="fas fa-${item.origem === 'drive' ? 'cloud' : 'file-audio'}"></i> <span>${item.titulo}</span>`;
                 li.onclick = () => tocar(i);
                 lista.appendChild(li);
@@ -268,6 +354,7 @@
 
         // --- 4. MOTOR DO PLAYER ---
         function atualizarAnimacao(tocando) {
+            isMusicPlaying = tocando; // Acelera as partículas do fundo
             if(tocando) {
                 rodapeAnimacao.classList.add('is-playing');
             } else {
@@ -293,7 +380,7 @@
                 containerVideo.style.display = 'block';
                 iframeDrive.src = item.url;
                 iframeDrive.style.display = 'block';
-                vaiTocar = true; // O Drive toca no iframe
+                vaiTocar = true; 
             } else { 
                 const isVideo = item.url.startsWith('blob:') && document.getElementById('add-file').files[0]?.type.includes('video');
                 if (isVideo) {
@@ -351,7 +438,6 @@
         // LÓGICA DE TELA CHEIA
         const btnFullscreen = document.getElementById('btn-fullscreen');
         btnFullscreen.onclick = () => {
-            // Se o vídeo não estiver aparecendo, não faz sentido dar tela cheia
             if(containerVideo.style.display === 'none' || containerVideo.style.display === '') {
                 alert("Selecione um vídeo primeiro para usar a tela cheia.");
                 return;
