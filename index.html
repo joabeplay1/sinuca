@@ -133,28 +133,22 @@
 const TABLE = { width:1100, height:550, padding:52, pocketRadius:22, railWidth:26 };
 const BR = 14, FRICTION = 0.987, MIN_SPEED = 0.08;
 const BALL_COLORS = [
-  {color:'#FFFFFF',stripe:false,number:0},
-  {color:'#F5C800',stripe:false,number:1},
-  {color:'#1A3FCB',stripe:false,number:2},
-  {color:'#D42020',stripe:false,number:3},
-  {color:'#6B21A8',stripe:false,number:4},
-  {color:'#F97316',stripe:false,number:5},
-  {color:'#16A34A',stripe:false,number:6},
-  {color:'#7C2D12',stripe:false,number:7},
-  {color:'#111827',stripe:false,number:8},
-  {color:'#F5C800',stripe:true,number:9},
-  {color:'#1A3FCB',stripe:true,number:10},
-  {color:'#D42020',stripe:true,number:11},
-  {color:'#6B21A8',stripe:true,number:12},
-  {color:'#F97316',stripe:true,number:13},
-  {color:'#16A34A',stripe:true,number:14},
-  {color:'#7C2D12',stripe:true,number:15},
+  {color:'#FFFFFF',stripe:false,number:0}, {color:'#F5C800',stripe:false,number:1},
+  {color:'#1A3FCB',stripe:false,number:2}, {color:'#D42020',stripe:false,number:3},
+  {color:'#6B21A8',stripe:false,number:4}, {color:'#F97316',stripe:false,number:5},
+  {color:'#16A34A',stripe:false,number:6}, {color:'#7C2D12',stripe:false,number:7},
+  {color:'#111827',stripe:false,number:8}, {color:'#F5C800',stripe:true,number:9},
+  {color:'#1A3FCB',stripe:true,number:10}, {color:'#D42020',stripe:true,number:11},
+  {color:'#6B21A8',stripe:true,number:12}, {color:'#F97316',stripe:true,number:13},
+  {color:'#16A34A',stripe:true,number:14}, {color:'#7C2D12',stripe:true,number:15},
 ];
+
 function getPockets(){
   const p=TABLE.padding,w=TABLE.width,h=TABLE.height,r=TABLE.pocketRadius;
   return [{x:p+r*0.3,y:p+r*0.3},{x:w/2,y:p-3},{x:w-p-r*0.3,y:p+r*0.3},
           {x:p+r*0.3,y:h-p-r*0.3},{x:w/2,y:h-p+3},{x:w-p-r*0.3,y:h-p-r*0.3}];
 }
+
 function createBalls(){
   const sx=TABLE.width*0.68,sy=TABLE.height/2,d=BR*2.05;
   const balls=[{x:TABLE.width*0.27,y:sy,vx:0,vy:0,...BALL_COLORS[0],pocketed:false}];
@@ -165,6 +159,7 @@ function createBalls(){
   }
   return balls;
 }
+
 function physics(balls){
   const pockets=getPockets(),pocketed=[];
   for(const b of balls){if(b.pocketed)continue;b.x+=b.vx;b.y+=b.vy;b.vx*=FRICTION;b.vy*=FRICTION;
@@ -188,131 +183,98 @@ function physics(balls){
   return pocketed;
 }
 
-// Renderer
 function drawDiamond(ctx,x,y){
-  ctx.save();ctx.shadowColor='rgba(255,200,80,0.6)';ctx.shadowBlur=4;
-  const s=4;ctx.beginPath();ctx.moveTo(x,y-s);ctx.lineTo(x+s*0.6,y);ctx.lineTo(x,y+s);ctx.lineTo(x-s*0.6,y);ctx.closePath();
-  const g=ctx.createRadialGradient(x,y-1,0,x,y,s);g.addColorStop(0,'#fffbe0');g.addColorStop(0.5,'#e8c84a');g.addColorStop(1,'#a87c10');
-  ctx.fillStyle=g;ctx.fill();ctx.restore();
+  ctx.save(); const s=4; ctx.beginPath(); ctx.moveTo(x,y-s); ctx.lineTo(x+s*0.6,y); ctx.lineTo(x,y+s); ctx.lineTo(x-s*0.6,y); ctx.closePath();
+  ctx.fillStyle='#e8c84a'; ctx.fill(); ctx.restore();
 }
+
 function drawPocket(ctx,x,y){
   const r=TABLE.pocketRadius;
-  ctx.save();ctx.shadowColor='rgba(0,0,0,0.8)';ctx.shadowBlur=12;
-  ctx.beginPath();ctx.arc(x,y,r+5,0,Math.PI*2);ctx.fillStyle='#0a0500';ctx.fill();ctx.restore();
-  const lg=ctx.createRadialGradient(x,y,r*0.5,x,y,r+5);
-  lg.addColorStop(0,'#1a0a00');lg.addColorStop(0.7,'#3d1a05');lg.addColorStop(1,'#5a2a08');
-  ctx.beginPath();ctx.arc(x,y,r+4,0,Math.PI*2);ctx.fillStyle=lg;ctx.fill();
-  ctx.beginPath();ctx.arc(x,y,r+2,0,Math.PI*2);ctx.strokeStyle='#8a6020';ctx.lineWidth=1.5;ctx.stroke();
-  const hg=ctx.createRadialGradient(x-r*0.2,y-r*0.2,0,x,y,r);
-  hg.addColorStop(0,'#0a0a0a');hg.addColorStop(1,'#000');
-  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=hg;ctx.fill();
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle='#000';ctx.fill();
+  ctx.beginPath();ctx.arc(x,y,r+2,0,Math.PI*2);ctx.strokeStyle='#8a6020';ctx.lineWidth=2;ctx.stroke();
 }
+
 function drawTableFn(ctx){
   const W=TABLE.width,H=TABLE.height,pad=TABLE.padding,rw=TABLE.railWidth;
-  const wg=ctx.createLinearGradient(0,0,W,H);
-  wg.addColorStop(0,'#4a2008');wg.addColorStop(0.25,'#6b3510');wg.addColorStop(0.5,'#7d3e12');wg.addColorStop(0.75,'#6b3510');wg.addColorStop(1,'#4a2008');
-  ctx.fillStyle=wg;ctx.fillRect(0,0,W,H);
-  ctx.save();ctx.globalAlpha=0.07;
-  for(let i=0;i<W;i+=7){const g=ctx.createLinearGradient(i,0,i+2,H);g.addColorStop(0,'rgba(255,200,100,0)');g.addColorStop(0.5,'rgba(255,200,100,1)');g.addColorStop(1,'rgba(255,200,100,0)');ctx.fillStyle=g;ctx.fillRect(i,0,1.5,H);}
-  ctx.restore();
-  ctx.strokeStyle='#c8921a';ctx.lineWidth=2;ctx.strokeRect(6,6,W-12,H-12);
-  const rg=ctx.createRadialGradient(W/2,H/2,H*0.1,W/2,H/2,H*0.8);
-  rg.addColorStop(0,'#1a6b34');rg.addColorStop(1,'#0e4a22');
-  ctx.fillStyle=rg;ctx.fillRect(pad,pad,W-pad*2,H-pad*2);
+  ctx.fillStyle='#5a2a08'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#187a38'; ctx.fillRect(pad,pad,W-pad*2,H-pad*2);
   const p=pad+rw;
-  const fg=ctx.createRadialGradient(W/2,H/2,30,W/2,H/2,H*0.7);
-  fg.addColorStop(0,'#1e8c42');fg.addColorStop(0.5,'#187a38');fg.addColorStop(1,'#0f5424');
-  ctx.fillStyle=fg;ctx.fillRect(p,p,W-p*2,H-p*2);
-  const ag=ctx.createRadialGradient(W*0.3,H*0.25,0,W*0.3,H*0.25,W*0.7);
-  ag.addColorStop(0,'rgba(255,255,220,0.07)');ag.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=ag;ctx.fillRect(p,p,W-p*2,H-p*2);
-  ctx.strokeStyle='rgba(80,200,100,0.5)';ctx.lineWidth=1.5;ctx.strokeRect(p,p,W-p*2,H-p*2);
+  ctx.fillStyle='#1e8c42'; ctx.fillRect(p,p,W-p*2,H-p*2);
   for(const d of [0.25,0.5,0.75]){
-    drawDiamond(ctx,pad+(W-pad*2)*d,pad+rw/2);drawDiamond(ctx,pad+(W-pad*2)*d,H-pad-rw/2);
-    drawDiamond(ctx,pad+rw/2,pad+(H-pad*2)*d);drawDiamond(ctx,W-pad-rw/2,pad+(H-pad*2)*d);
+    drawDiamond(ctx,pad+(W-pad*2)*d,pad+rw/2); drawDiamond(ctx,pad+(W-pad*2)*d,H-pad-rw/2);
+    drawDiamond(ctx,pad+rw/2,pad+(H-pad*2)*d); drawDiamond(ctx,W-pad-rw/2,pad+(H-pad*2)*d);
   }
   for(const pk of getPockets())drawPocket(ctx,pk.x,pk.y);
-  ctx.beginPath();ctx.setLineDash([5,6]);ctx.moveTo(W*0.27,p+2);ctx.lineTo(W*0.27,H-p-2);
-  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);
-  [[W*0.68,H/2],[W*0.27,H/2],[W/2,H/2]].forEach(([sx,sy])=>{
-    ctx.beginPath();ctx.arc(sx,sy,3,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.1)';ctx.fill();});
-  const lg2=ctx.createRadialGradient(W/2,-60,10,W/2,p,W*0.6);
-  lg2.addColorStop(0,'rgba(255,245,200,0.12)');lg2.addColorStop(0.5,'rgba(255,245,200,0.04)');lg2.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=lg2;ctx.fillRect(p,p,W-p*2,H-p*2);
 }
+
 function drawBallFn(ctx,b){
   if(b.pocketed)return;
   const {x,y,color,stripe,number}=b,R=BR;
-  ctx.save();ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=8;ctx.shadowOffsetX=3;ctx.shadowOffsetY=4;
-  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=stripe?'#F8F8F8':color;ctx.fill();ctx.restore();
-  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=stripe?'#F8F8F8':color;ctx.fill();
-  if(stripe){ctx.save();ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.clip();ctx.fillStyle=color;ctx.fillRect(x-R,y-R*0.52,R*2,R*1.04);ctx.restore();}
-  const dg=ctx.createRadialGradient(x+R*0.25,y+R*0.3,0,x,y,R*1.1);
-  dg.addColorStop(0,'rgba(0,0,0,0)');dg.addColorStop(0.6,'rgba(0,0,0,0)');dg.addColorStop(1,'rgba(0,0,0,0.45)');
-  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=dg;ctx.fill();
-  if(number>0){
-    ctx.save();ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=2;
-    ctx.beginPath();ctx.arc(x,y,R*0.48,0,Math.PI*2);ctx.fillStyle='#FFFFFF';ctx.fill();ctx.restore();
-    if(number===8){ctx.beginPath();ctx.arc(x,y,R*0.48,0,Math.PI*2);ctx.fillStyle='#111';ctx.fill();}
-    ctx.fillStyle=number===8?'#FFF':'#111';
-    ctx.font=`bold ${R*0.78}px Arial`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(number,x,y+0.8);
-  }
-  const hg=ctx.createRadialGradient(x-R*0.38,y-R*0.38,0,x-R*0.2,y-R*0.2,R*0.85);
-  hg.addColorStop(0,'rgba(255,255,255,0.55)');hg.addColorStop(0.35,'rgba(255,255,255,0.12)');hg.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=hg;ctx.fill();
-  ctx.beginPath();ctx.arc(x-R*0.35,y-R*0.35,R*0.16,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fill();
-  ctx.beginPath();ctx.arc(x-R*0.42,y-R*0.42,R*0.07,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,1)';ctx.fill();
-  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=0.8;ctx.stroke();
-}
-function drawCueFn(ctx,cb,mx,my,pw){
-  const dx=cb.x-mx,dy=cb.y-my,angle=Math.atan2(dy,dx);
-  ctx.save();ctx.globalAlpha=0.15;ctx.beginPath();
-  ctx.arc(cb.x+Math.cos(angle)*120,cb.y+Math.sin(angle)*120,BR,0,Math.PI*2);
-  ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();ctx.restore();
-  ctx.save();ctx.beginPath();ctx.setLineDash([6,7]);
-  ctx.moveTo(cb.x+Math.cos(angle)*(BR+2),cb.y+Math.sin(angle)*(BR+2));
-  ctx.lineTo(cb.x+Math.cos(angle)*200,cb.y+Math.sin(angle)*200);
-  ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);ctx.restore();
-  const off=BR+6+pw*0.55,cl=260;
-  const sx=cb.x-Math.cos(angle)*off,sy=cb.y-Math.sin(angle)*off;
-  const ex=sx-Math.cos(angle)*cl,ey=sy-Math.sin(angle)*cl;
-  ctx.save();ctx.shadowColor='rgba(0,0,0,0.5)';ctx.shadowBlur=6;ctx.shadowOffsetX=2;ctx.shadowOffsetY=2;
-  const bl=cl*0.45;const bex=ex+Math.cos(angle)*bl,bey=ey+Math.sin(angle)*bl;
-  ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(bex,bey);ctx.strokeStyle='#0a0a0a';ctx.lineWidth=9;ctx.lineCap='round';ctx.stroke();
-  ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(bex,bey);ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=3;ctx.stroke();
-  ctx.beginPath();ctx.arc(bex,bey,5,0,Math.PI*2);ctx.fillStyle='#e0e0e0';ctx.fill();
-  const ssx=bex+Math.cos(angle)*3,ssy=bey+Math.sin(angle)*3;
-  const slen=cl*0.4,sex=ssx+Math.cos(angle)*slen,sey=ssy+Math.sin(angle)*slen;
-  const sg=ctx.createLinearGradient(ssx,ssy,sex,sey);
-  sg.addColorStop(0,'#222');sg.addColorStop(0.1,'#555');sg.addColorStop(0.3,'#f0ede8');sg.addColorStop(0.7,'#fafafa');sg.addColorStop(1,'#e8e4de');
-  ctx.beginPath();ctx.moveTo(ssx,ssy);ctx.lineTo(sex,sey);ctx.strokeStyle=sg;ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke();
-  ctx.beginPath();ctx.moveTo(ssx,ssy);ctx.lineTo(sex,sey);ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;ctx.stroke();
-  ctx.beginPath();ctx.arc(sex+Math.cos(angle)*2,sey+Math.sin(angle)*2,4,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-  ctx.beginPath();ctx.arc(sx,sy,3.5,0,Math.PI*2);ctx.fillStyle='#2d6fa8';ctx.fill();
-  ctx.restore();
-  if(pw>0){
-    const mw=80,bw=(pw/100)*mw,bx=cb.x-mw/2,by=cb.y+BR+22;
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx-2,by-2,mw+4,12,4);else ctx.rect(bx-2,by-2,mw+4,12);
-    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fill();
-    const pg=ctx.createLinearGradient(bx,by,bx+mw,by);
-    pg.addColorStop(0,'#16a34a');pg.addColorStop(0.5,'#eab308');pg.addColorStop(1,'#dc2626');
-    ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx,by,bw,8,3);else ctx.rect(bx,by,bw,8);
-    ctx.fillStyle=pg;ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,0.9)';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(Math.round(pw)+'%',cb.x,by+4);
+  ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=stripe?'#FFF':color;ctx.fill();
+  if(stripe){ctx.save();ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.clip();ctx.fillStyle=color;ctx.fillRect(x-R,y-R*0.5,R*2,R);ctx.restore();}
+  if(number>=0){
+    ctx.beginPath();ctx.arc(x,y,R*0.5,0,Math.PI*2);ctx.fillStyle='#FFF';ctx.fill();
+    ctx.fillStyle='#000';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(number,x,y);
   }
 }
 
-// Game state
+function drawCueFn(ctx,cb,mx,my,pw,activeAngle){
+  const angle = isDragging ? activeAngle : Math.atan2(cb.y - my, cb.x - mx);
+  ctx.save();
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(cb.x, cb.y);
+  ctx.lineTo(cb.x + Math.cos(angle) * 200, cb.y + Math.sin(angle) * 200);
+  ctx.strokeStyle = "rgba(255,255,255,0.2)";
+  ctx.stroke();
+  ctx.restore();
+
+  const dist = BR + 10 + (pw * 0.8); 
+  const cueLen = 300;
+  const startX = cb.x - Math.cos(angle) * dist;
+  const startY = cb.y - Math.sin(angle) * dist;
+  const endX = startX - Math.cos(angle) * cueLen;
+  const endY = startY - Math.sin(angle) * cueLen;
+
+  ctx.save();
+  ctx.lineWidth = 6;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(endX, endY);
+  ctx.strokeStyle = "#5a3a1a";
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(startX - Math.cos(angle) * 20, startY - Math.sin(angle) * 20);
+  ctx.strokeStyle = "#eee";
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.restore();
+
+  if(pw > 0) {
+    const barW = 100, barH = 12;
+    const bx = cb.x - barW/2, by = cb.y + 40;
+    ctx.fillStyle = "rgba(0,0,0,0.8)";
+    ctx.fillRect(bx, by, barW, barH);
+    const fillW = (pw/100) * barW;
+    ctx.fillStyle = pw > 70 ? "#ff4444" : (pw > 40 ? "#ffcc00" : "#44ff44");
+    ctx.fillRect(bx, by, fillW, barH);
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(bx, by, barW, barH);
+  }
+}
+
 const canvas=document.getElementById('gameCanvas');
 const ctx=canvas.getContext('2d');
-let balls,mouseX=canvas.width/2,mouseY=canvas.height/2;
-let isDragging=false,dragSX=0,dragSY=0,power=0,isMoving=false,placingCue=false;
-let currentPlayer=1,winner=null,pocketedThisTurn=[],p1score=0,p2score=0,p1balls=[],p2balls=[];
+let balls, mouseX=0, mouseY=0, dragAngle = 0;
+let isDragging=false, power=0, isMoving=false, placingCue=false;
+let currentPlayer=1, winner=null, pocketedThisTurn=[], p1score=0, p2score=0, p1balls=[], p2balls=[];
 let wasMoving=false;
 
 function getCoords(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(TABLE.width/r.width),y:(e.clientY-r.top)*(TABLE.height/r.height)};}
 function setMsg(t){document.getElementById('message').textContent=t;}
+
 function updateUI(){
   document.getElementById('p1score').textContent=p1score;
   document.getElementById('p2score').textContent=p2score;
@@ -321,56 +283,81 @@ function updateUI(){
   document.getElementById('p1dot').style.display=currentPlayer===1?'block':'none';
   document.getElementById('p2dot').style.display=currentPlayer===2?'block':'none';
   document.getElementById('turnIndicator').textContent='P'+currentPlayer+' vez';
-  const mk=b=>{const d=document.createElement('div');d.className='mini-ball';d.style.backgroundColor=b.stripe?'#FFF':b.color;if(b.stripe){const s=document.createElement('div');s.style.cssText=`position:absolute;left:0;right:0;top:30%;bottom:30%;background:${b.color};z-index:1`;d.appendChild(s);}const sp=document.createElement('span');sp.textContent=b.number;d.appendChild(sp);return d;};
-  const p1=document.getElementById('p1balls');p1.innerHTML='';p1balls.forEach(b=>p1.appendChild(mk(b)));
-  const p2=document.getElementById('p2balls');p2.innerHTML='';p2balls.forEach(b=>p2.appendChild(mk(b)));
 }
+
 function onPocket(b){
-  if(b.number===0){setMsg('❌ Falta! Bola branca na caçapa. Adversário posiciona.');return;}
+  if(b.number===0){setMsg('❌ Branca caiu! Reposicione.'); return;}
   if(b.number===8){
-    const cb=currentPlayer===1?p1balls:p2balls;
-    if(cb.length>=7){winner=currentPlayer;setMsg('🏆 Jogador '+currentPlayer+' VENCEU!');}
-    else{winner=currentPlayer===1?2:1;setMsg('💀 Jogador '+currentPlayer+' encaçapou o 8 cedo! Jogador '+winner+' vence!');}
-    document.getElementById('winnerText').textContent='Jogador '+winner+' é o campeão! 🎱';
-    setTimeout(()=>document.getElementById('winnerModal').classList.add('open'),900);return;
+    winner = (p1balls.length >= 7 && currentPlayer === 1) || (p2balls.length >= 7 && currentPlayer === 2) ? currentPlayer : (currentPlayer === 1 ? 2 : 1);
+    document.getElementById('winnerText').textContent='Jogador '+winner+' VENCEU! 🎱';
+    document.getElementById('winnerModal').classList.add('open');
+    return;
   }
   pocketedThisTurn.push(b);
-  if(currentPlayer===1){p1score++;p1balls.push(b);}else{p2score++;p2balls.push(b);}
+  if(currentPlayer===1) { p1score++; p1balls.push(b); } else { p2score++; p2balls.push(b); }
   updateUI();
 }
+
 function onTurnEnd(){
-  if(winner)return;
-  if(pocketedThisTurn.length===0){currentPlayer=currentPlayer===1?2:1;setMsg('Vez do Player '+currentPlayer+' 🎱');}
-  else setMsg('✅ Boa! Player '+currentPlayer+' joga novamente.');
-  pocketedThisTurn=[];updateUI();
+  if(winner) return;
+  if(pocketedThisTurn.length===0){currentPlayer=currentPlayer===1?2:1; setMsg('Vez do Player '+currentPlayer);}
+  else setMsg('✅ Boa! Jogue novamente.');
+  pocketedThisTurn=[]; updateUI();
 }
+
 function resetGame(){
-  balls=createBalls();isMoving=false;wasMoving=false;placingCue=false;
-  currentPlayer=1;winner=null;pocketedThisTurn=[];p1score=0;p2score=0;p1balls=[];p2balls=[];
-  setMsg('Vez do Player 1 — Boa sorte! 🎱');updateUI();
+  balls=createBalls(); isMoving=false; wasMoving=false; placingCue=false;
+  currentPlayer=1; winner=null; pocketedThisTurn=[]; p1score=0; p2score=0; p1balls=[]; p2balls=[];
+  setMsg('Vez do Player 1 — Boa sorte! 🎱'); updateUI();
 }
-canvas.addEventListener('mousemove',e=>{const c=getCoords(e);mouseX=c.x;mouseY=c.y;if(isDragging){const dx=c.x-dragSX,dy=c.y-dragSY;power=Math.min(100,Math.sqrt(dx*dx+dy*dy)*0.5);}});
-canvas.addEventListener('mousedown',e=>{if(isMoving)return;const c=getCoords(e);if(placingCue){const p2=TABLE.padding+TABLE.railWidth+BR;balls[0].x=Math.max(p2,Math.min(TABLE.width*0.27,c.x));balls[0].y=Math.max(p2,Math.min(TABLE.height-p2,c.y));balls[0].pocketed=false;balls[0].vx=0;balls[0].vy=0;placingCue=false;return;}isDragging=true;dragSX=c.x;dragSY=c.y;});
-canvas.addEventListener('mouseup',()=>{if(!isDragging||isMoving)return;const cb=balls[0];if(!cb.pocketed&&power>2){const dx=cb.x-mouseX,dy=cb.y-mouseY,angle=Math.atan2(dy,dx);cb.vx=Math.cos(angle)*power*0.12;cb.vy=Math.sin(angle)*power*0.12;}isDragging=false;power=0;});
-canvas.addEventListener('mouseleave',()=>{isDragging=false;power=0;});
-canvas.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];canvas.dispatchEvent(new MouseEvent('mousedown',{clientX:t.clientX,clientY:t.clientY}));},{passive:false});
-canvas.addEventListener('touchmove',e=>{e.preventDefault();const t=e.touches[0];canvas.dispatchEvent(new MouseEvent('mousemove',{clientX:t.clientX,clientY:t.clientY}));},{passive:false});
-canvas.addEventListener('touchend',e=>{e.preventDefault();canvas.dispatchEvent(new MouseEvent('mouseup',{}));},{passive:false});
+
+canvas.addEventListener('mousemove', e => {
+  const c=getCoords(e); mouseX=c.x; mouseY=c.y;
+  if(isDragging){
+    const cb = balls[0];
+    const dist = Math.sqrt(Math.pow(c.x - cb.x, 2) + Math.pow(c.y - cb.y, 2));
+    power = Math.min(100, Math.max(0, dist - 20)); 
+  }
+});
+
+canvas.addEventListener('mousedown', e => {
+  if(isMoving) return;
+  const c=getCoords(e);
+  if(placingCue){
+    balls[0].x=c.x; balls[0].y=c.y; balls[0].pocketed=false; placingCue=false; return;
+  }
+  isDragging=true;
+  dragAngle = Math.atan2(balls[0].y - c.y, balls[0].x - c.x);
+});
+
+window.addEventListener('mouseup', () => {
+  if(!isDragging) return;
+  if(power > 5){
+    balls[0].vx = Math.cos(dragAngle) * (power * 0.15);
+    balls[0].vy = Math.sin(dragAngle) * (power * 0.15);
+  }
+  isDragging=false; power=0;
+});
 
 function gameLoop(){
-  const moving=balls.some(b=>!b.pocketed&&(Math.abs(b.vx)>MIN_SPEED||Math.abs(b.vy)>MIN_SPEED));
-  if(moving){const pk=physics(balls);isMoving=true;wasMoving=true;for(const b of pk){onPocket(b);if(b.number===0)placingCue=true;}}
-  else if(wasMoving){isMoving=false;wasMoving=false;onTurnEnd();}
+  const moving = balls.some(b=>!b.pocketed && (Math.abs(b.vx)>MIN_SPEED || Math.abs(b.vy)>MIN_SPEED));
+  if(moving){
+    const pk=physics(balls); isMoving=true; wasMoving=true;
+    for(const b of pk){ onPocket(b); if(b.number===0) placingCue=true; }
+  } else if(wasMoving){
+    isMoving=false; wasMoving=false; onTurnEnd();
+  }
   ctx.clearRect(0,0,TABLE.width,TABLE.height);
   drawTableFn(ctx);
-  for(const b of balls)drawBallFn(ctx,b);
-  const cb=balls[0];
-  if(!isMoving&&!cb.pocketed&&!placingCue)drawCueFn(ctx,cb,mouseX,mouseY,isDragging?power:0);
-  if(placingCue){const p2=TABLE.padding+TABLE.railWidth+BR;const gx=Math.max(p2,Math.min(TABLE.width*0.27,mouseX)),gy=Math.max(p2,Math.min(TABLE.height-p2,mouseY));
-    ctx.save();ctx.shadowColor='rgba(255,255,255,0.4)';ctx.shadowBlur=15;ctx.beginPath();ctx.arc(gx,gy,BR,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.35)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();}
+  for(const b of balls) drawBallFn(ctx,b);
+  if(!isMoving && !balls[0].pocketed && !placingCue) drawCueFn(ctx, balls[0], mouseX, mouseY, power, dragAngle);
+  if(placingCue){
+    ctx.beginPath(); ctx.arc(mouseX, mouseY, BR, 0, Math.PI*2);
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.fill();
+  }
   requestAnimationFrame(gameLoop);
 }
-resetGame();gameLoop();
+resetGame(); gameLoop();
 </script>
 </body>
 </html>
