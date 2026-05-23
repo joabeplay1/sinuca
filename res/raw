@@ -1,4 +1,0 @@
-MediaPlayer mediaPlayer =
-MediaPlayer.create(this, R.raw.arcade_music);
-
-mediaPlayer.start();         res/raw
