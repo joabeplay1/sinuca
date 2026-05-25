@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Aplicativos Pro</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Criador de Aplicativos</h1>
+        
+        <div class="input-area">
+            <textarea id="promptInput" placeholder="Descreva o que o seu aplicativo deve fazer..."></textarea>
+        </div>
+
+        <div class="button-group">
+            <button id="btnGerar" onclick="processarApp('gerar')">Gerar Aplicativo</button>
+            <button id="btnMelhorar" onclick="processarApp('melhorar')">Melhorar Aplicativo</button>
+        </div>
+
+        <div class="loading" id="loader" style="display: none;">Processando com IA...</div>
+
+        <div class="output-area">
+            <h2>Resultado do Aplicativo:</h2>
+            <div id="resultado"> O código gerado ou melhorado vai aparecer aqui...</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
