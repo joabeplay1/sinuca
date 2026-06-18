@@ -72,8 +72,8 @@
       width: 280px;
       padding: 30px;
       border-right: 1px solid var(--border);
-      display: flex; /* Added for flex layout */
-      flex-direction: column; /* Added for flex layout */
+      display: flex; 
+      flex-direction: column; 
     }
 
     .logo {
@@ -90,7 +90,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 40px; /* Added margin */
+      margin-bottom: 40px; 
     }
 
     nav button {
@@ -103,9 +103,9 @@
       cursor: pointer;
       font-size: 16px;
       transition: .35s;
-      display: flex; /* Added for icon alignment */
-      align-items: center; /* Added for icon alignment */
-      gap: 10px; /* Added for icon spacing */
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
     }
 
     nav button:hover {
@@ -120,9 +120,9 @@
 
     /* PLAYLIST */
     .playlist-box {
-      margin-top: auto; /* Pushes playlist to bottom */
-      padding-top: 20px; /* Added padding */
-      border-top: 1px solid var(--border); /* Added separator */
+      margin-top: auto; 
+      padding-top: 20px; 
+      border-top: 1px solid var(--border); 
     }
 
     .playlist-box h3 {
@@ -140,9 +140,9 @@
       cursor: pointer;
       color: #aaa;
       transition: .3s;
-      white-space: nowrap; /* Prevent wrapping */
-      overflow: hidden; /* Hide overflow */
-      text-overflow: ellipsis; /* Add ellipsis */
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
     }
 
     .playlist-box li:hover {
@@ -154,8 +154,8 @@
     .main {
       flex: 1;
       padding: 30px;
-      overflow-y: auto; /* Changed to Y for vertical scroll */
-      overflow-x: hidden; /* Hide horizontal scroll */
+      overflow-y: auto; 
+      overflow-x: hidden; 
     }
 
     /* SEARCH */
@@ -188,9 +188,9 @@
       padding: 35px;
       border-radius: 24px;
       margin-bottom: 35px;
-      display: flex; /* Added for layout */
-      align-items: center; /* Added for layout */
-      min-height: 200px; /* Ensure minimum height */
+      display: flex; 
+      align-items: center; 
+      min-height: 200px; 
     }
 
     .hero h1 {
@@ -214,7 +214,7 @@
       cursor: pointer;
       font-weight: 700;
       background: linear-gradient(90deg, var(--primary), var(--secondary));
-      color: var(--bg); /* Text color for button */
+      color: var(--bg); 
       transition: .3s;
     }
 
@@ -248,7 +248,7 @@
       width: 100%;
       border-radius: 16px;
       margin-bottom: 12px;
-      aspect-ratio: 1/1; /* Ensure square covers */
+      aspect-ratio: 1/1; 
       object-fit: cover;
     }
 
@@ -273,7 +273,7 @@
       justify-content: space-between;
       padding: 0 20px;
       border-top: 1px solid var(--border);
-      z-index: 1000; /* Ensure player is on top */
+      z-index: 1000; 
     }
 
     /* SONG INFO */
@@ -282,7 +282,7 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      flex-shrink: 0; /* Prevent shrinking */
+      flex-shrink: 0; 
     }
 
     .song-info img {
@@ -307,7 +307,7 @@
     }
 
     .song-info div {
-      overflow: hidden; /* Hide overflow for text */
+      overflow: hidden; 
     }
 
     .song-info h4 {
@@ -341,7 +341,7 @@
       border-radius: 50%;
       background: rgba(255, 255, 255, .05);
       color: white;
-      font-size: 20px; /* Larger icons */
+      font-size: 20px; 
       transition: .3s;
       display: flex;
       align-items: center;
@@ -356,7 +356,7 @@
         var(--primary),
         var(--secondary)
       );
-      color: var(--bg); /* Text color for button */
+      color: var(--bg); 
     }
 
     .controls button.active,
@@ -371,17 +371,17 @@
 
     /* PROGRESS */
     .progress-area {
-      flex: 1; /* Allow progress bar to take available space */
-      margin: 0 20px; /* Spacing */
+      flex: 1; 
+      margin: 0 20px; 
     }
 
     #progress {
       width: 100%;
       cursor: pointer;
       accent-color: var(--primary);
-      height: 4px; /* Thinner progress bar */
+      height: 4px; 
       border-radius: 2px;
-      -webkit-appearance: none; /* Remove default styling */
+      -webkit-appearance: none; 
       appearance: none;
       background: rgba(255, 255, 255, 0.1);
       transition: .3s;
@@ -467,7 +467,7 @@
       width: 180px;
       height: 60px;
       pointer-events: none;
-      z-index: 999; /* Below player, above main content */
+      z-index: 999; 
     }
 
     /* SCROLL */
@@ -542,7 +542,7 @@
 
       #equalizerCanvas {
         right: 15px;
-        bottom: 15px; /* Adjust position for smaller screens */
+        bottom: 15px; 
         width: 120px;
         height: 40px;
       }
@@ -593,7 +593,7 @@
     }
 
     .upload-box {
-      width: 420px;
+      width: 440px;
       padding: 30px;
       border-radius: 20px;
       background: rgba(20, 20, 30, 0.75);
@@ -636,10 +636,47 @@
       box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
     }
 
-    .upload-box input[type="file"] {
-      width: 100%;
+    /* Linhas flex para alinhar input e botão do Drive */
+    .upload-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .upload-row input[type="file"] {
+      flex: 1;
       color: #ccc;
       font-size: 13px;
+    }
+
+    /* ESTILO DO BOTÃO GOOGLE DRIVE */
+    .drive-btn {
+      background: rgba(66, 133, 244, 0.15) !important;
+      color: #4285f4 !important;
+      border: 1px solid rgba(66, 133, 244, 0.4) !important;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      white-space: nowrap;
+    }
+
+    .drive-btn:hover {
+      background: #4285f4 !important;
+      color: #fff !important;
+      box-shadow: 0 0 12px rgba(66, 133, 244, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .drive-status-text {
+      display: none;
+      font-size: 11px;
+      color: #00f7ff;
+      margin-top: -2px;
+      margin-bottom: 8px;
     }
 
     .upload-actions {
